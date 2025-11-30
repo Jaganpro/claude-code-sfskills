@@ -46,7 +46,7 @@ This repository contains three powerful, production-ready skills that transform 
 
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/claude-code-salesforce-skills.git
+git clone https://github.com/your-github-username/claude-code-salesforce-skills.git
 cd claude-code-salesforce-skills
 
 # Install all skills globally (recommended)
@@ -222,7 +222,7 @@ Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for gui
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/claude-code-salesforce-skills.git
+git clone https://github.com/your-github-username/claude-code-salesforce-skills.git
 cd claude-code-salesforce-skills
 
 # Install for testing
@@ -237,9 +237,9 @@ python3 bulk_validate.py
 
 ## 🐛 Issues & Support
 
-- **Bug Reports**: [GitHub Issues](https://github.com/YOUR_USERNAME/claude-code-salesforce-skills/issues)
-- **Feature Requests**: [GitHub Issues](https://github.com/YOUR_USERNAME/claude-code-salesforce-skills/issues)
-- **Questions**: [GitHub Discussions](https://github.com/YOUR_USERNAME/claude-code-salesforce-skills/discussions)
+- **Bug Reports**: [GitHub Issues](https://github.com/your-github-username/claude-code-salesforce-skills/issues)
+- **Feature Requests**: [GitHub Issues](https://github.com/your-github-username/claude-code-salesforce-skills/issues)
+- **Questions**: [GitHub Discussions](https://github.com/your-github-username/claude-code-salesforce-skills/discussions)
 
 ## 📜 License
 
@@ -277,4 +277,4 @@ Copyright (c) 2024-2025 Jag Valaiyapathy
 
 **Made with ❤️ for the Salesforce and Claude Code communities**
 
-[⭐ Star this repository](https://github.com/YOUR_USERNAME/claude-code-salesforce-skills) if you find it helpful!
+[⭐ Star this repository](https://github.com/your-github-username/claude-code-salesforce-skills) if you find it helpful!

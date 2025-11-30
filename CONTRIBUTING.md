@@ -17,7 +17,7 @@ Thank you for your interest in contributing! This document provides guidelines a
 
 ```bash
 # Fork the repository on GitHub, then:
-git clone https://github.com/YOUR_USERNAME/claude-code-salesforce-skills.git
+git clone https://github.com/your-github-username/claude-code-salesforce-skills.git
 cd claude-code-salesforce-skills
 ```
 
@@ -341,8 +341,8 @@ Project maintainers will enforce these standards and may remove, edit, or reject
 
 ## ❓ Questions?
 
-- Open a [GitHub Discussion](https://github.com/YOUR_USERNAME/claude-code-salesforce-skills/discussions)
-- Check existing [Issues](https://github.com/YOUR_USERNAME/claude-code-salesforce-skills/issues)
+- Open a [GitHub Discussion](https://github.com/your-github-username/claude-code-salesforce-skills/discussions)
+- Check existing [Issues](https://github.com/your-github-username/claude-code-salesforce-skills/issues)
 - Review the [README](README.md)
 
 ## 🙏 Recognition

@@ -132,7 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/claude-code-salesforce-skills.git
+git clone https://github.com/your-github-username/claude-code-salesforce-skills.git
 cd claude-code-salesforce-skills
 ./install.sh
 ```
@@ -180,11 +180,11 @@ cd claude-code-salesforce-skills
 ---
 
 ## Links
-- [Repository](https://github.com/YOUR_USERNAME/claude-code-salesforce-skills)
-- [Issues](https://github.com/YOUR_USERNAME/claude-code-salesforce-skills/issues)
-- [Discussions](https://github.com/YOUR_USERNAME/claude-code-salesforce-skills/discussions)
+- [Repository](https://github.com/your-github-username/claude-code-salesforce-skills)
+- [Issues](https://github.com/your-github-username/claude-code-salesforce-skills/issues)
+- [Discussions](https://github.com/your-github-username/claude-code-salesforce-skills/discussions)
 - [License](LICENSE)
 
 ---
 
-**Note**: Replace `YOUR_USERNAME` with your actual GitHub username when publishing.
+**Note**: Replace `your-github-username` with your actual GitHub username when publishing.
