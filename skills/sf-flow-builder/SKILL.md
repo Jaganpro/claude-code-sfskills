@@ -103,8 +103,11 @@ Expert Salesforce Flow Builder with deep knowledge of best practices, bulkificat
    - Detect: Multiple objects/steps, cross-object updates, conditional logic
    - Suggest: Parent-Child (independent), Sequential (dependent), Conditional (scenarios)
    - Ask: "Create parent flow + subflows?"
-   - **CRITICAL LIMITATION**: Record-triggered flows (processType: AutoLaunchedFlow) CANNOT call subflows via `<actionCalls>` with `<actionType>flow</actionType>`
-   - **Workaround**: Use inline orchestration with organized sections (comments/element naming) instead of separate subflows
+   - **IMPORTANT CONSIDERATION**: Record-triggered flows CAN call subflows, but require specific configuration:
+     - Parent flow must be optimized for **"Actions and Related Records"** (NOT "Fast Field Updates")
+     - Subflows must be Autolaunched Flows with variables marked "Available for Input" and "Available for Output"
+     - Deploy subflows BEFORE parent flow (dependency order)
+     - Alternative: Use inline orchestration with organized sections if optimization for "Fast Field Updates" is required
    - See: [docs/orchestration-guide.md](docs/orchestration-guide.md)
 
 ### Phase 3: Flow Generation & Validation
@@ -341,12 +344,17 @@ Correct order within `<recordLookups>`:
 - Multiple conflicting rules in Metadata API
 - **Recommendation**: Create Transform elements in Flow Builder UI, then deploy - do NOT hand-write
 
-**actionCalls Limitation (Record-Triggered Flows):**
-- ❌ **CANNOT use** `<actionCalls>` with `<actionType>flow</actionType>` in record-triggered flows (processType: AutoLaunchedFlow)
-- Error: "You can't use the Flows action type in flows with the Autolaunched Flow process type"
-- ✅ **Solution**: Use inline orchestration with organized sections instead of calling subflows
-- Pattern: Section 1 (Contact creation) → Section 2 (Opportunity creation) → Section 3 (Notification) with clear element naming and comments
-- **Note**: Screen Flows and certain Autolaunched flows CAN call subflows - limitation is specific to record-triggered flows
+**Subflow Calling in Record-Triggered Flows (Optimization Mode Matters):**
+- ✅ **CAN call subflows** IF parent flow is optimized for **"Actions and Related Records"**
+- ❌ **CANNOT call subflows** IF parent flow is optimized for **"Fast Field Updates"**
+- **Requirements for subflow calling**:
+  - Subflows must be Autolaunched Flows (processType: AutoLaunchedFlow)
+  - Variables must be marked "Available for Input" and "Available for Output"
+  - Deploy subflows BEFORE parent flow (avoid dependency errors)
+  - Use Subflow element in Flow Builder UI to create proper XML structure
+- **Error if optimization wrong**: "You can't use the Flows action type in flows with the Autolaunched Flow process type"
+- **Alternative pattern**: Use inline orchestration with organized sections (Section 1: Contact creation → Section 2: Opportunity creation → Section 3: Notification) with clear element naming and comments
+- **Reference**: [Salesforce Help Article 000396957](https://help.salesforce.com/s/articleView?id=000396957&type=1)
 
 ## Edge Cases & Troubleshooting
 
