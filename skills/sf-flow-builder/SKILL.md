@@ -1,7 +1,7 @@
 ---
 name: sf-flow-builder
 description: Creates and validates Salesforce flows using best practices and metadata standards
-version: 1.4.0
+version: 2.0.0
 author: Jag Valaiyapathy
 license: MIT
 tags:
@@ -29,7 +29,7 @@ dependencies:
 metadata:
   format_version: "2.0.0"
   created: "2024-11-28"
-  updated: "2025-12-02"
+  updated: "2025-12-05"
   api_version: "62.0"
   license_file: "LICENSE"
   features:
@@ -40,6 +40,10 @@ metadata:
     - platform-events
     - before-save-triggers
     - before-delete-triggers
+    - v2-naming-prefixes
+    - store-output-validation
+    - same-object-query-detection
+    - three-tier-error-handling
 ---
 
 # sf-flow-builder: Salesforce Flow Creation and Validation
@@ -122,6 +126,14 @@ python3 ~/.claude/skills/sf-flow-builder/validators/enhanced_validator.py \
 - **BLOCK**: XML invalid, missing required fields (apiVersion/label/processType/status), API <62.0, broken refs, DML in loops
 - **WARN**: Element ordering, deprecated elements, non-zero coords, missing fault paths, unused vars, naming violations
 
+**New v2.0.0 Validations**:
+- `storeOutputAutomatically` detection (data leak prevention)
+- Same-object query anti-pattern (recommends $Record usage)
+- Complex formula in loops warning
+- Missing filters on Get Records
+- Null check after Get Records recommendation
+- Variable naming prefix validation (var_, col_, rec_, inp_, out_)
+
 **Run Simulation** (REQUIRED for record-triggered/scheduled):
 ```bash
 python3 ~/.claude/skills/sf-flow-builder/validators/flow_simulator.py \
@@ -175,13 +187,19 @@ For complex flows: [docs/governance-checklist.md](docs/governance-checklist.md) 
 
 ### Phase 5: Testing & Documentation
 
-**Type-specific testing**: See [docs/testing-guide.md](docs/testing-guide.md)
+**Type-specific testing**: See [docs/testing-guide.md](docs/testing-guide.md) | [docs/testing-checklist.md](docs/testing-checklist.md)
 
 Quick reference:
 - **Screen**: Setup → Flows → Run, test all paths/profiles
 - **Record-Triggered**: Create record, verify Debug Logs, **bulk test 200+ records**
 - **Autolaunched**: Apex test class, edge cases, bulkification
 - **Scheduled**: Verify schedule, manual Run first, monitor logs
+
+**Best Practices**: See [docs/flow-best-practices.md](docs/flow-best-practices.md) for:
+- Three-tier error handling strategy
+- Multi-step DML rollback patterns
+- Screen flow UX guidelines
+- Bypass mechanism for data loads
 
 **Security**: Test with multiple profiles. System mode requires security review.
 
@@ -218,9 +236,17 @@ Required alphabetical order: `apiVersion` → `assignments` → `decisions` → 
 - **Transform element**: Powerful but complex XML - NOT recommended for hand-written flows
 
 ### Design & Security
-- **Names**: Variables (camelCase), Elements (PascalCase_With_Underscores)
+- **Variable Names (v2.0.0)**: Use prefixes for clarity:
+  - `var_` Regular variables (e.g., `var_AccountName`)
+  - `col_` Collections (e.g., `col_ContactIds`)
+  - `rec_` Record variables (e.g., `rec_Account`)
+  - `inp_` Input variables (e.g., `inp_RecordId`)
+  - `out_` Output variables (e.g., `out_IsSuccess`)
+- **Element Names**: PascalCase_With_Underscores (e.g., `Check_Account_Type`)
+- **Button Names (v2.0.0)**: `Action_[Verb]_[Object]` (e.g., `Action_Save_Contact`)
 - **System vs User Mode**: Understand implications, validate FLS for sensitive fields
 - **No hardcoded data**: Use variables/custom settings
+- See [docs/flow-best-practices.md](docs/flow-best-practices.md) for comprehensive guidance
 
 ## Common Error Patterns
 

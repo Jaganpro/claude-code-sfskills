@@ -1,16 +1,26 @@
 #!/usr/bin/env python3
 """
-Naming Convention Validator for Salesforce Flows
+Naming Convention Validator for Salesforce Flows (v2.0.0)
 
 Validates flow naming conventions based on industry best practices.
 All checks are ADVISORY - they provide suggestions but do not block deployment.
 
-Naming Convention:
+Flow Naming Convention:
 - Record-Triggered: RTF_<Object>_<Purpose>
 - Screen Flow: Screen_<Purpose> or SCR_<Purpose>
 - Autolaunched: Auto_<Purpose> or AL_<Purpose>
 - Scheduled: Scheduled_<Purpose> or SCHED_<Purpose>
 - Subflow: Sub_<Purpose> or UTIL_<Purpose>
+
+Variable Naming Convention (v2.0.0):
+- var_ : Regular variables (e.g., var_AccountName)
+- col_ : Collections (e.g., col_ContactIds)
+- rec_ : Record variables (e.g., rec_Account)
+- inp_ : Input variables (e.g., inp_RecordId)
+- out_ : Output variables (e.g., out_IsSuccess)
+
+Button Naming Convention (v2.0.0):
+- Action_[Verb]_[Object] (e.g., Action_Save_Contact)
 """
 
 import re
@@ -94,10 +104,15 @@ class NamingValidator:
         if element_issues:
             results['element_naming_issues'] = element_issues
 
-        # Check variable naming
+        # Check variable naming (v2.0.0 prefixes)
         variable_issues = self._check_variable_naming()
         if variable_issues:
             results['variable_naming_issues'] = variable_issues
+
+        # Check button naming (v2.0.0)
+        button_issues = self._check_button_naming()
+        if button_issues:
+            results['button_naming_issues'] = button_issues
 
         return results
 
@@ -244,44 +259,127 @@ class NamingValidator:
         return issues
 
     def _check_variable_naming(self) -> List[Dict[str, str]]:
-        """Check if variables follow naming conventions (var, col prefixes)."""
+        """
+        Check if variables follow naming conventions (v2.0.0 prefixes).
+
+        Variable Prefixes:
+        - var_ : Regular variables
+        - col_ : Collections
+        - rec_ : Record variables
+        - inp_ : Input variables
+        - out_ : Output variables
+        """
         issues = []
+
+        # Valid prefixes (v2.0.0)
+        VALID_PREFIXES = ['var_', 'col_', 'rec_', 'inp_', 'out_']
 
         for variable in self.root.findall('.//sf:variables', self.namespace):
             name_elem = variable.find('sf:name', self.namespace)
             is_collection_elem = variable.find('sf:isCollection', self.namespace)
+            is_input_elem = variable.find('sf:isInput', self.namespace)
+            is_output_elem = variable.find('sf:isOutput', self.namespace)
+            data_type_elem = variable.find('sf:dataType', self.namespace)
 
             if name_elem is not None:
                 var_name = name_elem.text
+
+                # Skip system variables
+                if var_name.startswith('$'):
+                    continue
+
                 is_collection = is_collection_elem is not None and is_collection_elem.text == 'true'
+                is_input = is_input_elem is not None and is_input_elem.text == 'true'
+                is_output = is_output_elem is not None and is_output_elem.text == 'true'
+                is_record = data_type_elem is not None and data_type_elem.text == 'SObject'
 
-                # Check prefixes
+                # Check if any valid prefix is used
+                has_valid_prefix = any(var_name.startswith(prefix) for prefix in VALID_PREFIXES)
+
+                if has_valid_prefix:
+                    continue  # Already follows convention
+
+                # Determine recommended prefix based on variable type
                 if is_collection:
-                    if not var_name.startswith('col'):
-                        issues.append({
-                            'variable': var_name,
-                            'issue': 'Collection variable should start with "col"',
-                            'suggestion': f"col{var_name[0].upper()}{var_name[1:]}"
-                        })
-
-                        if len(issues) <= 3:
-                            self.suggestions.append(
-                                f"Variable '{var_name}' is a collection - consider prefix 'col' (e.g., col{var_name[0].upper()}{var_name[1:]})"
-                            )
+                    recommended_prefix = 'col_'
+                    reason = 'Collection variable'
+                elif is_input:
+                    recommended_prefix = 'inp_'
+                    reason = 'Input variable'
+                elif is_output:
+                    recommended_prefix = 'out_'
+                    reason = 'Output variable'
+                elif is_record:
+                    recommended_prefix = 'rec_'
+                    reason = 'Record variable'
                 else:
-                    if not var_name.startswith('var') and not var_name.startswith('$'):
-                        # System variables start with $, skip those
-                        if not var_name.startswith('$'):
-                            issues.append({
-                                'variable': var_name,
-                                'issue': 'Single variable should start with "var"',
-                                'suggestion': f"var{var_name[0].upper()}{var_name[1:]}"
-                            })
+                    recommended_prefix = 'var_'
+                    reason = 'Regular variable'
 
-                            if len(issues) <= 3:
-                                self.suggestions.append(
-                                    f"Variable '{var_name}' should use prefix 'var' (e.g., var{var_name[0].upper()}{var_name[1:]})"
-                                )
+                # Generate suggestion
+                clean_name = var_name
+                # Remove old-style prefixes if present
+                for old_prefix in ['var', 'col', 'rec']:
+                    if var_name.lower().startswith(old_prefix) and len(var_name) > len(old_prefix):
+                        if var_name[len(old_prefix)].isupper() or var_name[len(old_prefix)] == '_':
+                            clean_name = var_name[len(old_prefix):].lstrip('_')
+                            break
+
+                suggested_name = f"{recommended_prefix}{clean_name}"
+
+                issues.append({
+                    'variable': var_name,
+                    'issue': f'{reason} should use prefix "{recommended_prefix}"',
+                    'suggestion': suggested_name
+                })
+
+                if len(issues) <= 3:
+                    self.suggestions.append(
+                        f"Variable '{var_name}' ({reason}) - consider '{suggested_name}'"
+                    )
+
+        return issues
+
+    def _check_button_naming(self) -> List[Dict[str, str]]:
+        """
+        Check if screen buttons/actions follow naming convention (v2.0.0).
+
+        Pattern: Action_[Verb]_[Object]
+        Examples: Action_Save_Contact, Action_Submit_Application
+        """
+        issues = []
+
+        # Check screen actions (buttons)
+        for screen in self.root.findall('.//sf:screens', self.namespace):
+            for field in screen.findall('.//sf:fields', self.namespace):
+                field_type = field.find('sf:fieldType', self.namespace)
+
+                # Check if it's a button/action type
+                if field_type is not None and field_type.text in ['ComponentInstance', 'DisplayText']:
+                    name_elem = field.find('sf:name', self.namespace)
+                    if name_elem is not None:
+                        button_name = name_elem.text
+
+                        # Check if it follows Action_Verb_Object pattern
+                        if 'button' in button_name.lower() or 'action' in button_name.lower():
+                            if not re.match(r'^Action_[A-Z][a-z]+_[A-Z][A-Za-z]+$', button_name):
+                                # Extract verb and object from current name if possible
+                                parts = re.findall(r'[A-Z][a-z]+', button_name)
+                                if len(parts) >= 2:
+                                    suggested = f"Action_{parts[0]}_{parts[1]}"
+                                else:
+                                    suggested = f"Action_Perform_{button_name.replace('_', '')}"
+
+                                issues.append({
+                                    'button': button_name,
+                                    'issue': 'Button name should follow Action_[Verb]_[Object] pattern',
+                                    'suggestion': suggested
+                                })
+
+                                if len(issues) <= 2:
+                                    self.suggestions.append(
+                                        f"Button '{button_name}' - consider 'Action_[Verb]_[Object]' pattern"
+                                    )
 
         return issues
 
@@ -320,11 +418,17 @@ class NamingValidator:
             report.append(f"\n⚠️  Element Naming: {count} elements use default names")
             report.append("   Consider renaming for better readability")
 
-        # Variable naming
+        # Variable naming (v2.0.0)
         if 'variable_naming_issues' in results and results['variable_naming_issues']:
             count = len(results['variable_naming_issues'])
-            report.append(f"\n⚠️  Variable Naming: {count} variables don't follow convention")
-            report.append("   Recommended prefixes: 'var' (single), 'col' (collection)")
+            report.append(f"\n⚠️  Variable Naming: {count} variables don't follow v2.0.0 convention")
+            report.append("   Recommended prefixes: var_, col_, rec_, inp_, out_")
+
+        # Button naming (v2.0.0)
+        if 'button_naming_issues' in results and results['button_naming_issues']:
+            count = len(results['button_naming_issues'])
+            report.append(f"\n⚠️  Button Naming: {count} buttons don't follow convention")
+            report.append("   Recommended pattern: Action_[Verb]_[Object]")
 
         # Suggestions
         if results['suggestions']:

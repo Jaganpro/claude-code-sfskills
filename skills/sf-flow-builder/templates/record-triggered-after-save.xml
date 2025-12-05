@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <!--
-    Template: Record-Triggered Flow (After-Save)
+    Template: Record-Triggered Flow (After-Save) v2.0.0
     API Version: 62.0+
 
     IMPORTANT: This template follows strict alphabetical element ordering required by Salesforce Metadata API
@@ -13,6 +13,47 @@
     AUTO-LAYOUT: All locationX and locationY are set to 0 for Auto-Layout
     Benefits: Cleaner version control, easier code reviews, no coordinate noise in diffs
     Salesforce will automatically position elements optimally
+
+    ═══════════════════════════════════════════════════════════════════════════════
+    BEST PRACTICE: Using $Record in Record-Triggered Flows (v2.0.0)
+    ═══════════════════════════════════════════════════════════════════════════════
+
+    The $Record global variable gives you direct access to all fields on the triggering record.
+    USE $Record INSTEAD OF querying the same object that triggered this flow!
+
+    CORRECT - Use $Record directly:
+        {!$Record.Name}
+        {!$Record.AccountId}
+        {!$Record.Status}
+
+    INCORRECT - Querying the trigger object (wastes SOQL):
+        <recordLookups>
+            <object>Account</object>  <- Same as trigger object!
+            <filters>
+                <field>Id</field>
+                <value>{!$Record.Id}</value>
+            </filters>
+        </recordLookups>
+
+    WHEN TO QUERY:
+    - Related records (parent/child objects): Query is required
+    - Multiple records of same type: Query is required
+    - Records not related to $Record: Query is required
+
+    For UPDATE triggers only, $Record__Prior gives previous field values:
+        {!$Record__Prior.Status} - Value BEFORE the update
+        {!$Record.Status} - Value AFTER the update
+
+    WARNING: $Record__Prior is ONLY available when recordTriggerType is Update or CreateAndUpdate.
+    NEVER use $Record__Prior in Create-only or Delete triggers!
+
+    VARIABLE NAMING (v2.0.0):
+    - var_ for regular variables (e.g., var_ErrorMessage)
+    - col_ for collections (e.g., col_ContactIds)
+    - rec_ for record variables (e.g., rec_ParentAccount)
+    - inp_ for input variables (e.g., inp_RecordId)
+    - out_ for output variables (e.g., out_IsSuccess)
+    ═══════════════════════════════════════════════════════════════════════════════
     -->
 
     <apiVersion>62.0</apiVersion>
@@ -42,7 +83,7 @@
         <locationX>0</locationX>
         <locationY>0</locationY>
         <assignmentItems>
-            <assignToReference>varErrorMessage</assignToReference>
+            <assignToReference>var_ErrorMessage</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>$Flow.FaultMessage</elementReference>
@@ -61,6 +102,7 @@
             <name>Criteria_Met</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
+                <!-- BEST PRACTICE: Use $Record fields directly - no query needed! -->
                 <leftValueReference>$Record.{{FIELD_NAME}}</leftValueReference>
                 <operator>EqualTo</operator>
                 <rightValue>
@@ -104,9 +146,9 @@
 
     <status>Draft</status>
 
-    <!-- Variables for Error Handling -->
+    <!-- Variables for Error Handling (v2.0.0 naming) -->
     <variables>
-        <name>varErrorMessage</name>
+        <name>var_ErrorMessage</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>false</isInput>

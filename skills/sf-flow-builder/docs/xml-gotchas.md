@@ -2,17 +2,54 @@
 
 Critical XML metadata constraints and known issues when deploying flows via Metadata API.
 
+## storeOutputAutomatically Data Leak Risk (v2.0.0)
+
+**⚠️ SECURITY WARNING**: When `storeOutputAutomatically="true"` in recordLookups, **ALL fields** are retrieved and stored.
+
+### Risks
+
+1. **Data Leak**: Sensitive fields (SSN, salary, etc.) may be exposed unintentionally
+2. **Performance**: Large objects with many fields impact query performance
+3. **Screen Flow Exposure**: In screen flows, external users could access all data
+
+### Recommended Pattern
+
+**Always specify only the fields you need:**
+
+```xml
+<recordLookups>
+    <name>Get_Account</name>
+    <!-- Specify exact fields needed -->
+    <queriedFields>Id</queriedFields>
+    <queriedFields>Name</queriedFields>
+    <queriedFields>Industry</queriedFields>
+    <!-- Store in explicit variable -->
+    <outputReference>rec_Account</outputReference>
+</recordLookups>
+```
+
+**Avoid:**
+```xml
+<recordLookups>
+    <name>Get_Account</name>
+    <!-- Retrieves ALL fields - security risk! -->
+    <storeOutputAutomatically>true</storeOutputAutomatically>
+</recordLookups>
+```
+
+---
+
 ## recordLookups Conflicts
 
 **NEVER use both** `<storeOutputAutomatically>` AND `<outputReference>` together.
 
 **Choose ONE approach:**
 ```xml
-<!-- Option 1: Auto-store (creates variable automatically) -->
+<!-- Option 1: Auto-store (creates variable automatically) - NOT RECOMMENDED -->
 <storeOutputAutomatically>true</storeOutputAutomatically>
 
-<!-- Option 2: Explicit variable -->
-<outputReference>varAccountRecord</outputReference>
+<!-- Option 2: Explicit variable - RECOMMENDED -->
+<outputReference>rec_AccountRecord</outputReference>
 ```
 
 ## Element Ordering in recordLookups
