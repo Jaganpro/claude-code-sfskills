@@ -14,25 +14,12 @@ A collection of reusable skills for Salesforce development, specializing in Apex
 
 Think of skills as "installable superpowers" for your agentic coding tool. Instead of repeatedly explaining Salesforce best practices to your AI assistant, a skill pre-loads that knowledge so the AI becomes an instant expert.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         🧠 SKILL                                │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   📋 PROMPT TEMPLATE        Domain-specific instructions &     │
-│                             best practices the AI follows       │
-│                                                                 │
-│   📁 CODE TEMPLATES         Ready-to-use patterns, snippets,   │
-│                             and boilerplate for common tasks    │
-│                                                                 │
-│   ✅ VALIDATION HOOKS       Auto-checks that run when you      │
-│                             write files (scoring, linting)      │
-│                                                                 │
-│   🔗 TOOL INTEGRATIONS      CLI commands, APIs, and external   │
-│                             tools the skill can invoke          │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+| | Component | Description |
+|:-:|-----------|-------------|
+| 📋 | **Prompt Template** | Domain-specific instructions & best practices the AI follows |
+| 📁 | **Code Templates** | Ready-to-use patterns, snippets, and boilerplate for common tasks |
+| ✅ | **Validation Hooks** | Auto-checks that run when you write files (scoring, linting) |
+| 🔗 | **Tool Integrations** | CLI commands, APIs, and external tools the skill can invoke |
 
 ### Why Use Skills?
 
