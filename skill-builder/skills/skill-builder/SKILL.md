@@ -45,7 +45,7 @@ Use **AskUserQuestion** to collect (in sequence):
    mkdir -p {base_path}
    # Create optional dirs based on selection: examples/, templates/, scripts/, docs/
    ```
-4. **Load template**: `Read: templates/minimal-starter.md` (relative to plugin root)
+4. **Load template**: `Read: ../../templates/minimal-starter.md` (relative to SKILL.md location)
 5. **Replace placeholders**: {{SKILL_NAME}}, {{SKILL_DESCRIPTION}}, {{VERSION}}, {{AUTHOR}}, {{TAGS}}, {{ALLOWED_TOOLS}}
 6. **Write files**: SKILL.md + optional README.md, examples/example-usage.md
 
@@ -63,7 +63,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/validate_yaml.py {base_path}/SKILL.md
 - All tools in allowed-tools are valid (case-sensitive)
 - SKILL.md has content after frontmatter
 
-If validation fails: Report errors with line numbers and fixes. See [docs/validation-errors.md](docs/validation-errors.md) for detailed examples.
+If validation fails: Report errors with line numbers and fixes. See [../../docs/validation-errors.md](../../docs/validation-errors.md) for detailed examples.
 
 ### Phase 4: Testing (Optional)
 
@@ -81,12 +81,12 @@ Next Steps:
 2. Restart Claude Code to load skill
 3. Test: "Use the {name} skill to [task]"
 
-Resources: docs/skill-structure.md, docs/frontmatter-reference.md, docs/best-practices.md
+Resources: ../../docs/skill-structure.md, ../../docs/frontmatter-reference.md, ../../docs/best-practices.md
 ```
 
 ## Validation Error Handling
 
-When validation fails, provide actionable guidance. See [docs/validation-errors.md](docs/validation-errors.md) for:
+When validation fails, provide actionable guidance. See [../../docs/validation-errors.md](../../docs/validation-errors.md) for:
 - YAML syntax errors (unquoted special chars, indentation)
 - Missing required fields
 - Invalid tool names (case-sensitive)
@@ -113,7 +113,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/bulk_validate.py [--errors-only] [--format
 **Interpret results**: Total skills, valid count, warnings, errors.
 **Guide fixes**: Use interactive editor or manual edits.
 
-See [docs/workflow-examples.md](docs/workflow-examples.md) for output examples.
+See [../../docs/workflow-examples.md](../../docs/workflow-examples.md) for output examples.
 
 ## Interactive Editor (v2.0)
 
@@ -149,7 +149,7 @@ python3 ${CLAUDE_PLUGIN_ROOT}/scripts/dependency_manager.py circular my-skill   
 python3 ${CLAUDE_PLUGIN_ROOT}/scripts/dependency_manager.py validate --all      # Validate all
 ```
 
-See [docs/workflow-examples.md](docs/workflow-examples.md) for output examples.
+See [../../docs/workflow-examples.md](../../docs/workflow-examples.md) for output examples.
 
 ## Helper Functions
 

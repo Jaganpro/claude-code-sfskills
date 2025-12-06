@@ -26,8 +26,8 @@ Use **AskUserQuestion** to gather:
 
 **Then**:
 1. Check existing flows: `Glob: pattern="**/*.flow-meta.xml"`
-2. Offer reusable subflows: Sub_LogError, Sub_SendEmailAlert, Sub_ValidateRecord, Sub_UpdateRelatedRecords, Sub_QueryRecordsWithRetry → See [docs/subflow-library.md](docs/subflow-library.md)
-3. If complex automation: Reference [docs/governance-checklist.md](docs/governance-checklist.md)
+2. Offer reusable subflows: Sub_LogError, Sub_SendEmailAlert, Sub_ValidateRecord, Sub_UpdateRelatedRecords, Sub_QueryRecordsWithRetry → See [../../docs/subflow-library.md](../../docs/subflow-library.md)
+3. If complex automation: Reference [../../docs/governance-checklist.md](../../docs/governance-checklist.md)
 4. Create TodoWrite tasks: Gather requirements ✓, Select template, Generate XML, Validate, Deploy, Test
 
 ### Phase 2: Flow Design & Template Selection
@@ -35,13 +35,13 @@ Use **AskUserQuestion** to gather:
 **Select template**:
 | Flow Type | Template |
 |-----------|----------|
-| Screen | `templates/screen-flow-template.xml` |
-| Record-Triggered | `templates/record-triggered-*.xml` |
-| Platform Event | `templates/platform-event-flow-template.xml` |
-| Autolaunched | `templates/autolaunched-flow-template.xml` |
-| Scheduled | `templates/scheduled-flow-template.xml` |
+| Screen | `../../templates/screen-flow-template.xml` |
+| Record-Triggered | `../../templates/record-triggered-*.xml` |
+| Platform Event | `../../templates/platform-event-flow-template.xml` |
+| Autolaunched | `../../templates/autolaunched-flow-template.xml` |
+| Scheduled | `../../templates/scheduled-flow-template.xml` |
 
-Load via: `Read: templates/[template].xml` (relative to plugin root)
+Load via: `Read: ../../templates/[template].xml` (relative to SKILL.md location)
 
 **Naming**: API Name = PascalCase_With_Underscores (e.g., `Account_Creation_Screen_Flow`)
 
@@ -55,7 +55,7 @@ Load via: `Read: templates/[template].xml` (relative to plugin root)
 Rule: `allowFinish="true"` required on all screens. Connector present → "Next", absent → "Finish".
 
 **Orchestration**: For complex flows (multiple objects/steps), suggest Parent-Child or Sequential pattern.
-- **CRITICAL**: Record-triggered flows CANNOT call subflows via XML deployment. Use inline orchestration instead. See [docs/xml-gotchas.md](docs/xml-gotchas.md#subflow-calling-limitation) and [docs/orchestration-guide.md](docs/orchestration-guide.md)
+- **CRITICAL**: Record-triggered flows CANNOT call subflows via XML deployment. Use inline orchestration instead. See [../../docs/xml-gotchas.md](../../docs/xml-gotchas.md#subflow-calling-limitation) and [../../docs/orchestration-guide.md](../../docs/orchestration-guide.md)
 
 ### Phase 3: Flow Generation & Validation
 
@@ -139,11 +139,11 @@ python3 ${CLAUDE_PLUGIN_ROOT}/generators/doc_generator.py \
   docs/flows/[FlowName]_documentation.md
 ```
 
-For complex flows: [docs/governance-checklist.md](docs/governance-checklist.md) (min score: 140/200 for production)
+For complex flows: [../../docs/governance-checklist.md](../../docs/governance-checklist.md) (min score: 140/200 for production)
 
 ### Phase 5: Testing & Documentation
 
-**Type-specific testing**: See [docs/testing-guide.md](docs/testing-guide.md) | [docs/testing-checklist.md](docs/testing-checklist.md)
+**Type-specific testing**: See [../../docs/testing-guide.md](../../docs/testing-guide.md) | [../../docs/testing-checklist.md](../../docs/testing-checklist.md)
 
 Quick reference:
 - **Screen**: Setup → Flows → Run, test all paths/profiles
@@ -151,7 +151,7 @@ Quick reference:
 - **Autolaunched**: Apex test class, edge cases, bulkification
 - **Scheduled**: Verify schedule, manual Run first, monitor logs
 
-**Best Practices**: See [docs/flow-best-practices.md](docs/flow-best-practices.md) for:
+**Best Practices**: See [../../docs/flow-best-practices.md](../../docs/flow-best-practices.md) for:
 - Three-tier error handling strategy
 - Multi-step DML rollback patterns
 - Screen flow UX guidelines
@@ -170,7 +170,7 @@ Quick reference:
   Navigate: Setup → Process Automation → Flows → "[FlowName]"
 
 Next Steps: Test (unit, bulk, security), Review docs, Activate if Draft, Monitor logs
-Resources: examples/, docs/subflow-library.md, docs/orchestration-guide.md, docs/governance-checklist.md
+Resources: ../../examples/, ../../docs/subflow-library.md, ../../docs/orchestration-guide.md, ../../docs/governance-checklist.md
 ```
 
 ## Best Practices (Built-In Enforcement)
@@ -202,7 +202,7 @@ Required alphabetical order: `apiVersion` → `assignments` → `decisions` → 
 - **Button Names (v2.0.0)**: `Action_[Verb]_[Object]` (e.g., `Action_Save_Contact`)
 - **System vs User Mode**: Understand implications, validate FLS for sensitive fields
 - **No hardcoded data**: Use variables/custom settings
-- See [docs/flow-best-practices.md](docs/flow-best-practices.md) for comprehensive guidance
+- See [../../docs/flow-best-practices.md](../../docs/flow-best-practices.md) for comprehensive guidance
 
 ## Common Error Patterns
 
@@ -216,7 +216,7 @@ Required alphabetical order: `apiVersion` → `assignments` → `decisions` → 
 - Valid only for: `Update` or `CreateAndUpdate` triggers
 - Error: "$Record__Prior can only be used...with recordTriggerType of Update or CreateAndUpdate"
 
-**XML Gotchas**: See [docs/xml-gotchas.md](docs/xml-gotchas.md) for recordLookups conflicts, element ordering, Transform issues, and subflow limitations.
+**XML Gotchas**: See [../../docs/xml-gotchas.md](../../docs/xml-gotchas.md) for recordLookups conflicts, element ordering, Transform issues, and subflow limitations.
 
 ## Edge Cases
 

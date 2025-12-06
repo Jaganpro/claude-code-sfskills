@@ -44,7 +44,7 @@ Use **AskUserQuestion** to gather:
 | Test Data Factory | `templates/test-data-factory.cls` |
 | Standard Class | `templates/apex-class.cls` |
 
-Load via: `Read: templates/[template]` (relative to plugin root)
+Load via: `Read: ../../templates/[template]` (relative to SKILL.md location)
 
 ### Phase 3: Code Generation/Review
 
@@ -194,7 +194,7 @@ public class TA_Account_SetDefaults implements TriggerAction.BeforeInsert {
 }
 ```
 
-See [docs/trigger-actions-framework.md](docs/trigger-actions-framework.md) for full patterns.
+See [../../docs/trigger-actions-framework.md](../../docs/trigger-actions-framework.md) for full patterns.
 
 ---
 
@@ -240,14 +240,14 @@ See [docs/trigger-actions-framework.md](docs/trigger-actions-framework.md) for f
 
 ## Reference Documentation
 
-- [docs/best-practices.md](docs/best-practices.md) - Comprehensive best practices
-- [docs/trigger-actions-framework.md](docs/trigger-actions-framework.md) - TAF patterns
-- [docs/security-guide.md](docs/security-guide.md) - Security patterns
-- [docs/testing-guide.md](docs/testing-guide.md) - Testing patterns
-- [docs/naming-conventions.md](docs/naming-conventions.md) - Naming standards
-- [docs/solid-principles.md](docs/solid-principles.md) - SOLID in Apex
-- [docs/design-patterns.md](docs/design-patterns.md) - Factory, Repository, Builder
-- [docs/code-review-checklist.md](docs/code-review-checklist.md) - Review checklist
+- [../../docs/best-practices.md](../../docs/best-practices.md) - Comprehensive best practices
+- [../../docs/trigger-actions-framework.md](../../docs/trigger-actions-framework.md) - TAF patterns
+- [../../docs/security-guide.md](../../docs/security-guide.md) - Security patterns
+- [../../docs/testing-guide.md](../../docs/testing-guide.md) - Testing patterns
+- [../../docs/naming-conventions.md](../../docs/naming-conventions.md) - Naming standards
+- [../../docs/solid-principles.md](../../docs/solid-principles.md) - SOLID in Apex
+- [../../docs/design-patterns.md](../../docs/design-patterns.md) - Factory, Repository, Builder
+- [../../docs/code-review-checklist.md](../../docs/code-review-checklist.md) - Review checklist
 
 ---
 
