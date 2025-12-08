@@ -30,6 +30,73 @@ The sf-data skill provides comprehensive data management capabilities:
 
 ---
 
+## ⚠️ CRITICAL: Orchestration Workflow Order
+
+When using sf-data with other skills, **follow this execution order**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  CORRECT MULTI-SKILL ORCHESTRATION ORDER                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  1. sf-metadata    → Create object/field definitions (LOCAL files)          │
+│  2. sf-flow-builder → Create flow definitions (LOCAL files)                 │
+│  3. sf-deployment  → Deploy all metadata to org (REMOTE)                   │
+│  4. sf-data        → Create test data (REMOTE) ← YOU ARE HERE              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**⚠️ CRITICAL PREREQUISITE**:
+```
+Error: SObject type 'Custom_Object__c' is not supported
+```
+
+This error means the custom object hasn't been deployed yet!
+**sf-data operations REQUIRE objects to exist in the org.**
+
+**Before creating test data for custom objects:**
+1. Verify object exists: `sf sobject describe --sobject ObjectName__c --target-org alias`
+2. If object doesn't exist, use sf-deployment first
+3. Verify FLS: Ensure you have field access via Permission Set
+
+---
+
+## 🔑 Key Insights for Data Operations
+
+### Test with 251 Records
+
+**Why 251?**: Salesforce processes records in batches of 200
+- 251 records crosses the batch boundary
+- Validates bulk trigger/flow processing
+- Catches N+1 query patterns
+
+```apex
+// ALWAYS create 251+ records for bulk testing
+Integer recordCount = 251;  // Not 200, not 250, but 251
+```
+
+### Field-Level Security Blocking Access
+
+```
+Error: Field does not exist: Comments__c on Customer_Feedback__c
+```
+
+**This usually means FLS, not a missing field!**
+- Field was deployed but you don't have access
+- Solution: Create Permission Set with field access OR run as admin
+
+### Cleanup Best Practice
+
+**Always provide cleanup scripts with test data:**
+```apex
+// Cleanup by pattern (safe)
+DELETE [SELECT Id FROM Custom_Object__c WHERE Name LIKE 'Test%'];
+
+// Cleanup by created date (safer)
+DELETE [SELECT Id FROM Custom_Object__c WHERE CreatedDate = TODAY AND Name LIKE 'Test%'];
+```
+
+---
+
 ## Workflow Design (5-Phase Pattern)
 
 ### Phase 1: Requirements Gathering

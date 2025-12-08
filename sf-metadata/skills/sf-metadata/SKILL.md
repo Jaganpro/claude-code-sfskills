@@ -15,6 +15,45 @@ Expert Salesforce administrator specializing in metadata architecture, security 
 4. **Cross-Skill Integration**: Provide metadata discovery for sf-apex and sf-flow-builder
 5. **Deployment Integration**: Deploy metadata via sf-deployment skill
 
+## ⚠️ CRITICAL: Orchestration Workflow Order
+
+When using sf-metadata with other skills, **follow this execution order**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  CORRECT MULTI-SKILL ORCHESTRATION ORDER                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  1. sf-metadata    → Create object/field definitions (LOCAL files)          │
+│  2. sf-flow-builder → Create flow definitions (LOCAL files)                 │
+│  3. sf-deployment  → Deploy all metadata to org (REMOTE)                   │
+│  4. sf-data        → Create test data (REMOTE - objects must exist!)        │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**⚠️ COMMON MISTAKE**: Running sf-data BEFORE sf-deployment for custom objects.
+sf-data requires objects to exist in the org. Always deploy first!
+
+---
+
+## ⚠️ CRITICAL: Field-Level Security (FLS) Warning
+
+**Deployed fields are INVISIBLE until FLS is configured!**
+
+When you create custom objects/fields, they deploy successfully but users cannot see them without:
+1. A Permission Set granting field access, OR
+2. Profile field-level security updates
+
+**After creating objects/fields, ALWAYS ask:**
+```
+AskUserQuestion:
+  question: "Would you like me to auto-generate a Permission Set for field access?"
+  options:
+    - "Yes, generate Permission Set" → Create [ObjectName]_Access.permissionset-meta.xml
+    - "No, I'll handle FLS manually" → Continue without Permission Set
+```
+
+---
+
 ## Workflow (5-Phase Pattern)
 
 ### Phase 1: Requirements Gathering
@@ -127,6 +166,71 @@ Issues:
 ⚠️ [Best Practice] Consider using Global Value Set for reusable picklist
 ```
 
+### Phase 3.5: Permission Set Auto-Generation (NEW)
+
+**After creating Custom Objects or Fields, ALWAYS prompt the user:**
+
+```
+AskUserQuestion:
+  question: "Would you like me to generate a Permission Set for [ObjectName__c] field access?"
+  header: "FLS Setup"
+  options:
+    - label: "Yes, generate Permission Set"
+      description: "Creates [ObjectName]_Access.permissionset-meta.xml with object CRUD and field access"
+    - label: "No, I'll handle FLS manually"
+      description: "Skip Permission Set generation - you'll configure FLS via Setup or Profile"
+```
+
+**If user selects "Yes":**
+
+1. **Collect field information** from created metadata
+2. **Filter out required fields** (they are auto-visible, cannot be in Permission Sets)
+3. **Filter out formula fields** (can only be readable, not editable)
+4. **Generate Permission Set** at: `force-app/main/default/permissionsets/[ObjectName]_Access.permissionset-meta.xml`
+
+**Permission Set Generation Rules:**
+
+| Field Type | Include in Permission Set? | Notes |
+|------------|---------------------------|-------|
+| Required fields | ❌ NO | Auto-visible, Salesforce rejects in Permission Set |
+| Optional fields | ✅ YES | Include with `editable: true, readable: true` |
+| Formula fields | ✅ YES | Include with `editable: false, readable: true` |
+| Roll-Up Summary | ✅ YES | Include with `editable: false, readable: true` |
+| Master-Detail | ❌ NO | Controlled by parent object permissions |
+| Name field | ❌ NO | Always visible, cannot be in Permission Set |
+
+**Example Auto-Generated Permission Set:**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Auto-generated: Grants access to Customer_Feedback__c and its fields</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Customer Feedback Access</label>
+
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <object>Customer_Feedback__c</object>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+
+    <!-- NOTE: Required fields are EXCLUDED (auto-visible) -->
+    <!-- NOTE: Formula fields have editable=false -->
+
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Customer_Feedback__c.Optional_Field__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+</PermissionSet>
+```
+
+---
+
 ### Phase 4: Deployment
 
 **Step 1: Validation**
@@ -139,6 +243,17 @@ Request: "Deploy metadata at force-app/main/default/objects/[ObjectName] to [tar
 ```
 Skill(skill="sf-deployment")
 Request: "Proceed with actual deployment to [target-org]"
+```
+
+**Step 3: Deploy Permission Set** (if generated)
+```
+Skill(skill="sf-deployment")
+Request: "Deploy permission set at force-app/main/default/permissionsets/[ObjectName]_Access.permissionset-meta.xml to [target-org]"
+```
+
+**Step 4: Assign Permission Set** (optional)
+```bash
+sf org assign permset --name [ObjectName]_Access --target-org [alias]
 ```
 
 ### Phase 5: Verification
@@ -398,6 +513,103 @@ sf schema generate field --label "My Field" --object Account
 - **API Version**: 62.0 required
 - **Permission Sets Preferred**: Always recommend Permission Sets over Profile modifications
 - **Scoring**: Block deployment if score < 72
+
+---
+
+## Manual Validation Command
+
+If the automatic post-write validation hook doesn't trigger, run validation manually:
+
+```bash
+# Validate a single metadata file
+python3 /path/to/sf-metadata/hooks/scripts/validate_metadata.py <file_path>
+
+# Example
+python3 ~/.claude/plugins/marketplaces/sf-skills/sf-metadata/hooks/scripts/validate_metadata.py \
+  force-app/main/default/objects/Customer_Feedback__c/Customer_Feedback__c.object-meta.xml
+```
+
+**Hook Troubleshooting:**
+- Ensure `CLAUDE_PLUGIN_ROOT` environment variable is set
+- Check that hooks.json is properly formatted
+- Verify Python 3 is available in PATH
+- Check hook output in Claude Code logs
+
+---
+
+## 🔑 Key Insights & Lessons Learned
+
+These are critical lessons learned from real-world usage. **DO NOT repeat these mistakes!**
+
+### 1. FLS is the Silent Killer
+
+```
+⚠️ CRITICAL: Deployed fields can be INVISIBLE to users!
+```
+
+**Mistake**: Assuming deployment success = users can see fields
+**Reality**: FLS must be configured via Permission Set or Profile
+**Fix**: ALWAYS prompt user for Permission Set generation after creating objects/fields
+
+### 2. Required Fields Cannot Be in Permission Sets
+
+```
+Error: You cannot deploy to a required field: ObjectName.RequiredField__c
+```
+
+**Mistake**: Including required fields in Permission Set field permissions
+**Reality**: Required fields are automatically visible - Salesforce rejects them in Permission Sets
+**Fix**: Filter out required fields when generating Permission Sets
+
+### 3. Orchestration Order Matters
+
+```
+Error: SObject type 'Custom_Object__c' is not supported
+```
+
+**Mistake**: Trying to create test data before deploying custom objects
+**Reality**: sf-data operations require objects to exist in the org
+**Fix**: Always follow the order: sf-metadata → sf-flow-builder → sf-deployment → sf-data
+
+### 4. Validation Hooks May Not Fire
+
+**Mistake**: Assuming post-write validation always runs automatically
+**Reality**: Hooks require proper environment setup and may not trigger in all contexts
+**Fix**: Provide manual validation command as fallback, document troubleshooting steps
+
+### 5. Before-Save Flows Don't Need DML
+
+```
+✅ Before-Save: Assign to $Record.Field__c (auto-saved)
+❌ After-Save: Requires explicit recordUpdate DML
+```
+
+**Insight**: For field updates on the triggering record, Before-Save flows are more efficient
+**Benefit**: No extra DML statement, better performance, cleaner code
+
+### 6. Name Field is Always Visible
+
+**Mistake**: Including Name field in Permission Set
+**Reality**: The Name field (standard or auto-number) is always visible
+**Fix**: Never include Name field in fieldPermissions
+
+### 7. Test with 251 Records
+
+**Why 251?**: Salesforce batch boundaries are at 200 records
+**Benefit**: Tests bulk processing, catches N+1 patterns, validates governor limits
+**Standard**: Always test automation with 251+ records before production
+
+---
+
+## Common Error Reference
+
+| Error Message | Cause | Solution |
+|---------------|-------|----------|
+| `You cannot deploy to a required field` | Required field in Permission Set | Remove required fields from fieldPermissions |
+| `Field does not exist` | FLS blocking field visibility | Create Permission Set with field access |
+| `SObject type 'X' is not supported` | Object not deployed yet | Deploy metadata before creating data |
+| `Element X is duplicated` | XML elements not alphabetically ordered | Reorder elements in XML |
+| `Invalid field: Parent.Field__c` | Relationship traversal in flow | Use separate Get Records for parent |
 
 ---
 

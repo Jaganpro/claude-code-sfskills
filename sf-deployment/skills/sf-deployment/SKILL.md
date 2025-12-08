@@ -15,6 +15,80 @@ Expert Salesforce DevOps engineer specializing in deployment automation, CI/CD p
 4. **Quality Assurance**: Tests, code coverage, pre-production validation
 5. **Troubleshooting**: Debug failures, analyze logs, provide solutions
 
+---
+
+## ⚠️ CRITICAL: Orchestration Workflow Order
+
+When using sf-deployment with other skills, **follow this execution order**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  CORRECT MULTI-SKILL ORCHESTRATION ORDER                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  1. sf-metadata    → Create object/field definitions (LOCAL files)          │
+│  2. sf-flow-builder → Create flow definitions (LOCAL files)                 │
+│  3. sf-deployment  → Deploy all metadata to org (REMOTE) ← YOU ARE HERE    │
+│  4. sf-data        → Create test data (REMOTE - objects must exist!)        │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**⚠️ DEPLOYMENT ORDER WITHIN sf-deployment:**
+
+```
+1. Custom Objects & Fields FIRST
+2. Permission Sets (for FLS access)
+3. Flows (may reference custom fields)
+4. Apex Classes/Triggers
+5. Activate Flows (change status to Active)
+```
+
+**Why order matters:**
+- Flows referencing non-existent fields will fail
+- Users can't see fields without Permission Sets
+- Triggers may depend on flows being active
+
+---
+
+## 🔑 Key Insights for Deployment
+
+### Always Use --dry-run First
+
+```bash
+# CORRECT: Validate before deploying
+sf project deploy start --dry-run --source-dir force-app --target-org alias
+sf project deploy start --source-dir force-app --target-org alias
+
+# WRONG: Deploying without validation
+sf project deploy start --source-dir force-app --target-org alias  # Risky!
+```
+
+### Deploy Permission Sets After Objects
+
+**Common Error:**
+```
+Error: In field: field - no CustomObject named ObjectName__c found
+```
+
+**Solution:** Deploy objects first, THEN permission sets referencing them.
+
+### Activate Flows Separately
+
+1. Deploy flow with `<status>Draft</status>`
+2. Verify deployment succeeded
+3. Change to `<status>Active</status>`
+4. Redeploy
+
+### FLS Warning After Deployment
+
+**⚠️ Deployed fields may be INVISIBLE without FLS!**
+
+After deploying custom objects/fields:
+1. Deploy Permission Set granting field access
+2. Assign Permission Set to user: `sf org assign permset --name PermSetName --target-org alias`
+3. Verify field visibility
+
+---
+
 ## CLI Version (CRITICAL)
 
 **This skill uses `sf` CLI (v2.x), NOT legacy `sfdx` (v1.x)**

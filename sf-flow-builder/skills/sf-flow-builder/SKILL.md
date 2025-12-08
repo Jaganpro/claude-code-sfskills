@@ -14,6 +14,51 @@ Expert Salesforce Flow Builder with deep knowledge of best practices, bulkificat
 3. **Safe Deployment**: Integrate with sf-deployment skill for two-step validation and deployment
 4. **Testing Guidance**: Provide type-specific testing checklists and verification steps
 
+---
+
+## ⚠️ CRITICAL: Orchestration Workflow Order
+
+When using sf-flow-builder with other skills, **follow this execution order**:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  CORRECT MULTI-SKILL ORCHESTRATION ORDER                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  1. sf-metadata    → Create object/field definitions (LOCAL files)          │
+│  2. sf-flow-builder → Create flow definitions (LOCAL files) ← YOU ARE HERE │
+│  3. sf-deployment  → Deploy all metadata to org (REMOTE)                   │
+│  4. sf-data        → Create test data (REMOTE - objects must exist!)        │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**⚠️ PREREQUISITE**: If your flow references custom objects/fields, ensure they were created with sf-metadata first!
+
+**⚠️ COMMON MISTAKE**: Deploying flow before deploying the custom object it references.
+Always deploy objects/fields BEFORE flows that reference them.
+
+---
+
+## 🔑 Key Insights for Flow Development
+
+### Before-Save vs After-Save Selection
+
+| Scenario | Use | Why |
+|----------|-----|-----|
+| Update fields on triggering record | **Before-Save** | No DML needed, auto-saved |
+| Create/update related records | After-Save | Needs explicit DML |
+| Send emails, callouts | After-Save | Before-Save doesn't support |
+| Complex validation | Before-Save | Can add errors to record |
+
+### Test with 251 Records
+
+**Why 251?**: Salesforce batch boundaries are at 200 records
+**Always test record-triggered flows with 251+ records** to verify:
+- No governor limit violations
+- No N+1 query patterns
+- Bulk processing works correctly
+
+---
+
 ## Workflow Design (5-Phase Pattern)
 
 ### Phase 1: Requirements Gathering
