@@ -384,6 +384,37 @@ Request: "Describe object [ObjectName] in org [alias] - show fields, record type
 
 ---
 
+## Cross-Skill Integration: sf-data
+
+### Generate Test Data for Flow Testing
+
+After creating and deploying flows, use sf-data to create test records that trigger the flow:
+
+```
+Skill(skill="sf-data")
+Request: "Create test records to trigger Account_After_Save_Flow - include edge cases for all decision branches"
+```
+
+**Use this when:**
+- Testing record-triggered flows with specific entry criteria
+- Verifying flow handles bulk data correctly (200+ records)
+- Creating test data for screen flow demonstrations
+- Testing scheduled flow scenarios
+
+### Example Workflow
+
+1. Create record-triggered flow for Account
+2. Deploy to sandbox via sf-deployment
+3. Generate test data:
+   ```
+   Skill(skill="sf-data")
+   Request: "Create 200 test Accounts with Industry='Technology' and AnnualRevenue > 1000000 to trigger the flow in org dev"
+   ```
+4. Check Debug Logs for flow execution
+5. Verify expected outcomes
+
+---
+
 ## Dependencies
 
 - **sf-deployment** (optional): Required for deploying flows to Salesforce orgs
@@ -393,6 +424,10 @@ Request: "Describe object [ObjectName] in org [alias] - show fields, record type
 - **sf-metadata** (optional): Query org metadata before flow creation
   - Verifies objects and fields exist before building flows
   - Install: `/plugin install github:Jaganpro/sf-skills/sf-metadata`
+
+- **sf-data** (optional): Generate test data for flow testing
+  - Creates records that trigger record-triggered flows
+  - Install: `/plugin install github:Jaganpro/sf-skills/sf-data`
 
 ## Notes
 

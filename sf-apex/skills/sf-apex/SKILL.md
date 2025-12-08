@@ -281,6 +281,36 @@ Request: "Query org [alias] to describe object [ObjectName] and list all fields"
 
 ---
 
+## Cross-Skill Integration: sf-data
+
+### Generate Test Data for Trigger Testing
+
+After creating triggers or service classes, use sf-data to generate test records:
+
+```
+Skill(skill="sf-data")
+Request: "Create 251 test Account records with varying Industries for trigger bulk testing in org [alias]"
+```
+
+**Use this when:**
+- Testing triggers with bulk data (201+ records for batch boundaries)
+- Need to verify flow triggers with specific data patterns
+- Want to test edge cases with boundary values
+- Setting up integration test data
+
+### Example Workflow
+
+1. Create trigger using sf-apex
+2. Deploy via sf-deployment
+3. Generate test data:
+   ```
+   Skill(skill="sf-data")
+   Request: "Create test hierarchy: 10 Accounts with 3 Contacts and 2 Opportunities each for testing AccountTrigger"
+   ```
+4. Verify trigger behavior in org
+
+---
+
 ## Dependencies
 
 - **sf-deployment** (optional): Required for deploying Apex code to Salesforce orgs
@@ -290,6 +320,10 @@ Request: "Query org [alias] to describe object [ObjectName] and list all fields"
 - **sf-metadata** (optional): Query org metadata before code generation
   - Helps discover object fields and relationships
   - Install: `/plugin install github:Jaganpro/sf-skills/sf-metadata`
+
+- **sf-data** (optional): Generate test data for trigger/flow testing
+  - Creates bulk test records for trigger boundary testing
+  - Install: `/plugin install github:Jaganpro/sf-skills/sf-data`
 
 ## Notes
 

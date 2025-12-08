@@ -11,13 +11,14 @@
   "plugins": [
     {
       "name": "sf-skills",
-      "description": "Complete Salesforce development suite - Apex, Flow, Metadata, Deployment, and Skill Builder (install all at once)",
+      "description": "Complete Salesforce development suite - Apex, Flow, Metadata, Data, Deployment, and Skill Builder (install all at once)",
       "source": "./",
       "strict": false,
       "skills": [
         "./sf-apex/skills/sf-apex",
         "./sf-flow-builder/skills/sf-flow-builder",
         "./sf-metadata/skills/sf-metadata",
+        "./sf-data/skills/sf-data",
         "./sf-deployment/skills/sf-deployment",
         "./skill-builder/skills/skill-builder"
       ]
@@ -36,6 +37,11 @@
       "name": "sf-metadata",
       "description": "Salesforce metadata generation and org querying with 120-point scoring",
       "source": "./sf-metadata"
+    },
+    {
+      "name": "sf-data",
+      "description": "Salesforce data operations with SOQL expertise, test data factories, and 130-point validation",
+      "source": "./sf-data"
     },
     {
       "name": "sf-deployment",
