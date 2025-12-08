@@ -270,12 +270,27 @@ Get Records: Query Contacts where AccountId = $Record.Id
 - **No DML in Loops**: Collect in loop → DML after loop (causes bulk failures otherwise)
 - **Bulkify**: For RELATED records only - platform handles triggered record batching
 - **Fault Paths**: All DML must have fault connectors
+  - ⚠️ **Fault connectors CANNOT self-reference** - Error: "element cannot be connected to itself"
+  - Route fault connectors to a DIFFERENT element (dedicated error handler)
 - **Auto-Layout**: All locationX/Y = 0 (cleaner git diffs)
   - UI may show "Free-Form" dropdown, but locationX/Y = 0 IS Auto-Layout in XML
 - **No Parent Traversal**: Use separate Get Records for relationship field data
 
 ### XML Element Ordering (CRITICAL)
-Required alphabetical order: `apiVersion` → `assignments` → `decisions` → `description` → `label` → `loops` → `processType` → `recordCreates` → `recordUpdates` → `start` → `status` → `variables`
+
+**All elements of the same type MUST be grouped together. Do NOT scatter elements across the file.**
+
+Complete alphabetical order:
+```
+apiVersion → assignments → constants → decisions → description → environments →
+formulas → interviewLabel → label → loops → processMetadataValues → processType →
+recordCreates → recordDeletes → recordLookups → recordUpdates → runInMode →
+screens → start → status → subflows → textTemplates → variables → waits
+```
+
+**Common Mistake**: Adding an assignment near related logic (e.g., after a loop) when other assignments exist earlier.
+- **Error**: "Element assignments is duplicated at this location"
+- **Fix**: Move ALL assignments to the assignments section
 
 ### Performance
 - **Batch DML**: Get Records → Assignment → Update Records pattern
@@ -299,6 +314,8 @@ Required alphabetical order: `apiVersion` → `assignments` → `decisions` → 
 
 **DML in Loop**: Collect records in collection variable → Single DML after loop
 **Missing Fault Path**: Add fault connector from DML → error handling → log/display
+**Self-Referencing Fault**: Error "element cannot be connected to itself" → Route fault connector to DIFFERENT element
+**Element Duplicated**: Error "Element X is duplicated" → Group ALL elements of same type together
 **Field Not Found**: Verify field exists, deploy field first if missing
 **Insufficient Permissions**: Check profile permissions, consider System mode
 
@@ -325,6 +342,7 @@ Required alphabetical order: `apiVersion` → `assignments` → `decisions` → 
 - **Complex Branching (>5 paths)**: Suggest subflows, document criteria
 - **Cross-Object Updates**: Check circular dependencies, test for recursion
 - **Production**: Keep Draft initially, require explicit activation, provide rollback
+- **Testing/Unknown Org**: Prefer **standard objects** (Account, Contact, Opportunity, Task) for guaranteed deployability. Custom objects may not exist in target org.
 
 **Common Issues**:
 - Flow not visible → Check `sf project deploy report`, verify permissions, refresh Setup

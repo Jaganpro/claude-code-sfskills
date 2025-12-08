@@ -247,22 +247,158 @@ Use **inline orchestration** instead of subflows:
 
 **Reference**: [Salesforce Help Article 000396957](https://help.salesforce.com/s/articleView?id=000396957&type=1)
 
-## Root-Level Element Ordering
+## Fault Connectors Cannot Self-Reference (CRITICAL)
 
-Salesforce Metadata API requires **strict alphabetical ordering** at root level:
+**⚠️ DEPLOYMENT BLOCKER**: An element CANNOT have a fault connector pointing to itself.
 
-1. `<apiVersion>`
-2. `<assignments>`
-3. `<decisions>`
-4. `<description>`
-5. `<label>`
-6. `<loops>`
-7. `<processType>`
-8. `<recordCreates>`
-9. `<recordUpdates>`
-10. `<start>`
-11. `<status>`
-12. `<variables>`
+### What Doesn't Work
+
+```xml
+<!-- ❌ THIS WILL FAIL DEPLOYMENT -->
+<recordUpdates>
+    <name>Update_Account</name>
+    <label>Update Account</label>
+    <connector>
+        <targetReference>Next_Element</targetReference>
+    </connector>
+    <faultConnector>
+        <targetReference>Update_Account</targetReference>  <!-- FAILS! Self-reference -->
+    </faultConnector>
+    <!-- ... -->
+</recordUpdates>
+```
+
+**Error**: `The element "Update_Account" cannot be connected to itself.`
+
+### Why This Matters
+
+- Self-referencing fault connectors would create infinite loops on failure
+- Salesforce validates this during deployment and blocks it
+- This applies to ALL connector types (faultConnector, connector, nextValueConnector, etc.)
+
+### Correct Fault Handling Patterns
+
+**Option 1: Route to dedicated error handler:**
+```xml
+<recordUpdates>
+    <name>Update_Account</name>
+    <faultConnector>
+        <targetReference>Handle_Update_Error</targetReference>  <!-- ✅ Different element -->
+    </faultConnector>
+</recordUpdates>
+
+<assignments>
+    <name>Handle_Update_Error</name>
+    <!-- Log error, set flag, etc. -->
+</assignments>
+```
+
+**Option 2: Route to error logging assignment:**
+```xml
+<recordUpdates>
+    <name>Update_Account</name>
+    <faultConnector>
+        <targetReference>Log_Error_And_Continue</targetReference>  <!-- ✅ -->
+    </faultConnector>
+</recordUpdates>
+```
+
+**Option 3: Omit fault connector (flow will terminate on error):**
+```xml
+<recordUpdates>
+    <name>Update_Account</name>
+    <connector>
+        <targetReference>Next_Element</targetReference>
+    </connector>
+    <!-- No faultConnector - flow terminates on failure -->
+</recordUpdates>
+```
+
+### Best Practice
+
+- Always route fault connectors to a dedicated error handling element
+- Use an assignment to capture `{!$Flow.FaultMessage}` before logging
+- Consider whether the flow should continue or terminate on failure
+
+---
+
+## Root-Level Element Ordering (CRITICAL)
+
+Salesforce Metadata API requires **strict alphabetical ordering** at root level.
+
+### Complete Element Type List (Alphabetical Order)
+
+All elements of the same type MUST be grouped together. You CANNOT have elements of one type scattered across the file.
+
+```
+1.  <apiVersion>
+2.  <assignments>         ← ALL assignments together
+3.  <constants>
+4.  <decisions>           ← ALL decisions together
+5.  <description>
+6.  <environments>
+7.  <formulas>
+8.  <interviewLabel>
+9.  <label>
+10. <loops>               ← ALL loops together
+11. <processMetadataValues>
+12. <processType>
+13. <recordCreates>       ← ALL recordCreates together
+14. <recordDeletes>       ← ALL recordDeletes together
+15. <recordLookups>       ← ALL recordLookups together
+16. <recordUpdates>       ← ALL recordUpdates together
+17. <runInMode>
+18. <screens>             ← ALL screens together
+19. <start>
+20. <status>
+21. <subflows>            ← ALL subflows together
+22. <textTemplates>
+23. <variables>           ← ALL variables together
+24. <waits>
+```
+
+### The Grouping Rule (CRITICAL)
+
+**Wrong** - Assignment after loops section:
+```xml
+<assignments>
+    <name>Set_Initial_Values</name>
+    <!-- ... -->
+</assignments>
+<loops>
+    <name>Loop_Contacts</name>
+    <!-- ... -->
+</loops>
+<assignments>  <!-- ❌ FAILS: Can't have assignments after loops! -->
+    <name>Increment_Counter</name>
+    <!-- ... -->
+</assignments>
+```
+
+**Error**: `Element assignments is duplicated at this location in type Flow`
+
+**Correct** - All assignments together:
+```xml
+<assignments>  <!-- ✅ All assignments grouped -->
+    <name>Increment_Counter</name>
+    <!-- ... -->
+</assignments>
+<assignments>
+    <name>Set_Initial_Values</name>
+    <!-- ... -->
+</assignments>
+<loops>
+    <name>Loop_Contacts</name>
+    <!-- ... -->
+</loops>
+```
+
+### Why This Happens
+
+When generating flows programmatically or manually editing XML:
+- Easy to add a new element near related logic
+- Salesforce requires ALL elements of same type to appear consecutively
+- The "duplicate" error is misleading - it means elements aren't grouped
 
 **Note**: API 60.0+ does NOT use `<bulkSupport>` - bulk processing is automatic.
 
@@ -281,6 +417,16 @@ Salesforce Metadata API requires **strict alphabetical ordering** at root level:
 
 ## Summary: Lessons Learned
 
+### Fault Connector Self-Reference
+- **Problem**: Fault connector pointing to the same element
+- **Error**: "The element cannot be connected to itself"
+- **Solution**: Route fault connectors to a dedicated error handler element
+
+### XML Element Grouping
+- **Problem**: Elements of same type scattered across the file
+- **Error**: "Element X is duplicated at this location"
+- **Solution**: Group ALL elements of same type together, in alphabetical order by type
+
 ### Relationship Fields
 - **Problem**: Querying `Parent.Field` in Get Records
 - **Solution**: Two separate queries - child first, then parent by ID
@@ -296,3 +442,7 @@ Salesforce Metadata API requires **strict alphabetical ordering** at root level:
 ### $Record Context
 - **Problem**: Confusing Flow's `$Record` with Process Builder's `$Record__c`
 - **Solution**: `$Record` is single record, use without loops
+
+### Standard Objects for Testing
+- **Problem**: Custom objects may not exist in target org
+- **Solution**: When testing flow generation/deployment, prefer standard objects (Account, Contact, Opportunity, Task) for guaranteed deployability
