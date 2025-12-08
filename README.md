@@ -14,12 +14,15 @@ A collection of reusable skills for Salesforce development, specializing in Apex
 
 Think of skills as "installable superpowers" for your agentic coding tool. Instead of repeatedly explaining Salesforce best practices to your AI assistant, a skill pre-loads that knowledge so the AI becomes an instant expert.
 
-| | Component | Description |
-|:-:|-----------|-------------|
-| 📋 | **Prompt Template** | Domain-specific instructions & best practices the AI follows |
-| 📁 | **Code Templates** | Ready-to-use patterns, snippets, and boilerplate for common tasks |
-| ✅ | **Validation Hooks** | Auto-checks that run when you write files (scoring, linting) |
-| 🔗 | **Tool Integrations** | CLI commands, APIs, and external tools the skill can invoke |
+```
+sf-apex/
+├── SKILL.md              # 🧠 The brain - prompts & instructions
+├── templates/            # 📁 Code templates & patterns
+├── hooks/                # ✅ Validation scripts
+└── examples/             # 📖 Usage examples
+```
+
+> 💡 **Tip:** Skills are open-source and composable. You can fork, customize, or create your own!
 
 ### Why Use Skills?
 
@@ -30,18 +33,6 @@ Think of skills as "installable superpowers" for your agentic coding tool. Inste
 | ❌ Copy-paste boilerplate repeatedly | ✅ Production-ready templates built-in |
 | ❌ Remember CLI commands and flags | ✅ Skill handles tool orchestration |
 | ❌ Burn tokens on lengthy system prompts | ✅ Skills load on-demand, saving context |
-
-### Anatomy of a Skill
-
-```
-sf-apex/
-├── SKILL.md              # 🧠 The brain - prompts & instructions
-├── templates/            # 📁 Code templates & patterns
-├── hooks/                # ✅ Validation scripts
-└── examples/             # 📖 Usage examples
-```
-
-> 💡 **Tip:** Skills are open-source and composable. You can fork, customize, or create your own!
 
 ---
 
