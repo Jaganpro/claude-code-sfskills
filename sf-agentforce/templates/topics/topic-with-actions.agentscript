@@ -1,0 +1,30 @@
+# Topic with Actions Template
+# A topic that integrates with external systems via Flow or Apex actions
+
+topic {{TopicName}}:
+    description: "{{TopicDescription}}"
+
+    # Define actions available to this topic
+    actions:
+        {{ActionName}}:
+            description: "{{ActionDescription}}"
+            inputs:
+                {{InputName}}: {{InputType}}
+                    description: "{{InputDescription}}"
+            outputs:
+                {{OutputName}}: {{OutputType}}
+                    description: "{{OutputDescription}}"
+            target: "{{ActionTarget}}"  # flow://FlowName or apex://ClassName.methodName
+
+    reasoning:
+        instructions:->
+            | {{TopicInstructions}}
+            | Use the available actions to help the user.
+            | Capture and communicate results clearly.
+        actions:
+            invoke_action: @actions.{{ActionName}}
+                with {{InputName}}=...
+                set @variables.{{ResultVariable}} = @outputs.{{OutputName}}
+
+            back_to_menu: @utils.transition to @topic.topic_selector
+                description: "Return to main menu"

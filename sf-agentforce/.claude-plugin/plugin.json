@@ -1,0 +1,19 @@
+{
+  "name": "sf-agentforce",
+  "version": "1.0.0",
+  "description": "Creates Agentforce agents using Agent Script syntax. Generates complete agents with topics, actions, and variables. 100-point scoring across 6 categories. API v64+ required.",
+  "author": {
+    "name": "Jag Valaiyapathy",
+    "url": "https://github.com/Jaganpro"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/Jaganpro/sf-skills",
+  "keywords": [
+    "salesforce",
+    "agentforce",
+    "agent-script",
+    "ai-agents",
+    "genai",
+    "llm"
+  ]
+}

@@ -1,0 +1,68 @@
+# Multi-Topic Agent Template
+# An agent with multiple conversation topics (hub-and-spoke pattern)
+# Users are routed to specialized topics based on their needs
+
+config:
+    agent_name: "{{AgentApiName}}"
+    agent_label: "{{AgentLabel}}"
+    description: "{{AgentDescription}}"
+
+system:
+    messages:
+        welcome: "{{WelcomeMessage}}"
+        error: "I'm sorry, I encountered an issue. Please try again."
+    instructions:
+        | {{SystemInstructions}}
+        | Help users navigate to the right topic.
+        | Be friendly and professional.
+
+variables:
+    user_intent: mutable string = ""
+        description: "What the user is trying to accomplish"
+    current_topic: mutable string = ""
+        description: "The topic currently being handled"
+
+start_agent topic_selector:
+    description: "Routes users to the appropriate topic based on their needs"
+    reasoning:
+        instructions:->
+            | Determine what the user needs help with.
+            | Route them to the most appropriate topic.
+            | If unclear, ask clarifying questions.
+        actions:
+            topic_one: @utils.transition to @topic.{{TopicOneName}}
+                description: "{{TopicOneDescription}}"
+            topic_two: @utils.transition to @topic.{{TopicTwoName}}
+                description: "{{TopicTwoDescription}}"
+            topic_three: @utils.transition to @topic.{{TopicThreeName}}
+                description: "{{TopicThreeDescription}}"
+
+topic {{TopicOneName}}:
+    description: "{{TopicOneDescription}}"
+    reasoning:
+        instructions:->
+            | Handle {{TopicOneName}} related requests.
+            | {{TopicOneInstructions}}
+        actions:
+            back_to_menu: @utils.transition to @topic.topic_selector
+                description: "Return to main menu"
+
+topic {{TopicTwoName}}:
+    description: "{{TopicTwoDescription}}"
+    reasoning:
+        instructions:->
+            | Handle {{TopicTwoName}} related requests.
+            | {{TopicTwoInstructions}}
+        actions:
+            back_to_menu: @utils.transition to @topic.topic_selector
+                description: "Return to main menu"
+
+topic {{TopicThreeName}}:
+    description: "{{TopicThreeDescription}}"
+    reasoning:
+        instructions:->
+            | Handle {{TopicThreeName}} related requests.
+            | {{TopicThreeInstructions}}
+        actions:
+            back_to_menu: @utils.transition to @topic.topic_selector
+                description: "Return to main menu"

@@ -20,7 +20,8 @@
         "./sf-metadata/skills/sf-metadata",
         "./sf-data/skills/sf-data",
         "./sf-deploy/skills/sf-deploy",
-        "./skill-builder/skills/skill-builder"
+        "./skill-builder/skills/skill-builder",
+        "./sf-agentforce/skills/sf-agentforce"
       ]
     },
     {
@@ -52,6 +53,11 @@
       "name": "skill-builder",
       "description": "Interactive wizard for creating Claude Code skills",
       "source": "./skill-builder"
+    },
+    {
+      "name": "sf-agentforce",
+      "description": "Agentforce agent creation using Agent Script syntax with 100-point scoring (API v64+)",
+      "source": "./sf-agentforce"
     }
   ]
 }

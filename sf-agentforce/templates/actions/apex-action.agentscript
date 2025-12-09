@@ -1,0 +1,42 @@
+# Apex-Based Action Template
+# Define an action that calls a Salesforce Apex method
+
+{{ActionName}}:
+    description: "{{ActionDescription}}"
+    inputs:
+        {{Input1Name}}: {{Input1Type}}
+            description: "{{Input1Description}}"
+        {{Input2Name}}: {{Input2Type}}
+            description: "{{Input2Description}}"
+    outputs:
+        {{Output1Name}}: {{Output1Type}}
+            description: "{{Output1Description}}"
+        success: boolean
+            description: "Whether the operation succeeded"
+        error_message: string
+            description: "Error message if operation failed"
+    target: "apex://{{ApexClassName}}.{{ApexMethodName}}"
+
+# Usage in reasoning block:
+# reasoning:
+#     actions:
+#         invoke_{{ActionName}}: @actions.{{ActionName}}
+#             with {{Input1Name}}=...  # LLM fills from conversation
+#             with {{Input2Name}}=@variables.some_var  # From variable
+#             set @variables.result = @outputs.{{Output1Name}}
+#             set @variables.success = @outputs.success
+#             run @actions.handle_result  # Callback action
+#                 with result=@variables.result
+
+# Common Apex Target Patterns:
+# - apex://AccountService.getAccountDetails
+# - apex://CaseService.createCase
+# - apex://OrderService.processOrder
+# - apex://IntegrationService.callExternalApi
+# - apex://CalculationService.calculatePrice
+
+# Apex Class Requirements:
+# - Must be global or public
+# - Method must be @InvocableMethod or @AuraEnabled
+# - Parameters must match input definitions
+# - Return type must match output definitions

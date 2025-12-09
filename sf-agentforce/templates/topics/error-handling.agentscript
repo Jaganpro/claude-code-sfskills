@@ -1,0 +1,55 @@
+# Error Handling Topic Template
+# A topic with validation and guard clauses for critical operations
+
+topic {{TopicName}}:
+    description: "{{TopicDescription}} - includes validation and error handling"
+
+    actions:
+        {{ActionName}}:
+            description: "{{ActionDescription}}"
+            inputs:
+                {{InputName}}: {{InputType}}
+                    description: "{{InputDescription}}"
+            outputs:
+                success: boolean
+                    description: "Whether the operation succeeded"
+                error_message: string
+                    description: "Error message if operation failed"
+                {{OutputName}}: {{OutputType}}
+                    description: "{{OutputDescription}}"
+            target: "{{ActionTarget}}"
+
+    reasoning:
+        instructions:->
+            # Validation guard clauses
+            if @variables.{{RequiredField}} is None:
+                set @variables.validation_passed = False
+                | I need {{RequiredFieldDescription}} before I can proceed.
+                | Please provide this information.
+
+            if @variables.{{AmountField}} > {{MaxAmount}}:
+                set @variables.validation_passed = False
+                | The {{AmountFieldDescription}} exceeds the maximum of {{MaxAmount}}.
+                | Would you like to:
+                | - Use the maximum allowed amount
+                | - Split into multiple operations
+                | - Contact support for a higher limit
+
+            if @variables.validation_passed == True:
+                | All validations passed. Proceeding with the operation.
+
+        actions:
+            # Only available when validation passes
+            execute_action: @actions.{{ActionName}}
+                with {{InputName}}=@variables.{{InputVariable}}
+                set @variables.operation_success = @outputs.success
+                set @variables.result = @outputs.{{OutputName}}
+                available when @variables.validation_passed == True
+
+            # Handle errors
+            retry_operation: @utils.transition to @topic.{{TopicName}}
+                description: "Try again with different values"
+                available when @variables.operation_success == False
+
+            back_to_menu: @utils.transition to @topic.topic_selector
+                description: "Return to main menu"

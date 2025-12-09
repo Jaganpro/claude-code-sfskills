@@ -55,6 +55,7 @@ sf-apex/
 | **[sf-metadata](sf-metadata/)** | Metadata generation & org querying with 120-point scoring | ✅ Live |
 | **[sf-data](sf-data/)** | Data operations, SOQL expertise & test data factories with 130-point scoring | ✅ Live |
 | **[sf-deploy](sf-deploy/)** | DevOps & CI/CD automation using sf CLI v2 | ✅ Live |
+| **[sf-agentforce](sf-agentforce/)** | Agentforce agent creation with Agent Script & 100-point scoring | ✅ Live |
 | **[skill-builder](skill-builder/)** | Claude Code skill creation wizard | ✅ Live |
 
 ## 🚀 Installation
@@ -129,6 +130,7 @@ Each skill includes validation hooks that run automatically when you write files
 | sf-apex | `*.cls`, `*.trigger` | Apex anti-patterns, 150-point scoring, TAF compliance |
 | sf-metadata | `*.object-meta.xml`, `*.field-meta.xml`, etc. | Metadata best practices, 120-point scoring, FLS checks |
 | sf-data | `*.apex`, `*.soql` | SOQL patterns, 130-point scoring, governor limits |
+| sf-agentforce | `*.agentscript` | Agent Script syntax, 100-point scoring, topic validation |
 | skill-builder | `SKILL.md` | YAML frontmatter validation |
 
 Hooks provide **advisory feedback** after writes - they inform but don't block.
@@ -208,7 +210,7 @@ sf-industry-{name}        # Industries (healthcare, finserv)
 ### 🤖 AI & Automation
 | Skill | Description | Status |
 |-------|-------------|--------|
-| `sf-ai-agentforce` | Agent Studio, Topics, Actions | 📋 Planned |
+| `sf-agentforce` | Agent Script, Topics, Actions (API v64+) | ✅ Live |
 | `sf-ai-copilot` | Einstein Copilot, Prompts | 📋 Planned |
 | `sf-ai-einstein` | Prediction Builder, NBA | 📋 Planned |
 
@@ -232,7 +234,7 @@ sf-industry-{name}        # Industries (healthcare, finserv)
 | `sf-industry-finserv` | KYC, AML, Wealth Management | 📋 Planned |
 | `sf-industry-revenue` | CPQ, Billing, Revenue Lifecycle | 📋 Planned |
 
-**Total: 22 skills** (6 live ✅, 16 planned 📋)
+**Total: 22 skills** (7 live ✅, 15 planned 📋)
 
 ## Contributing
 

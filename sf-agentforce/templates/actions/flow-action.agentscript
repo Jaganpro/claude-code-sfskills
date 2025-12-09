@@ -1,0 +1,35 @@
+# Flow-Based Action Template
+# Define an action that calls a Salesforce Flow
+
+{{ActionName}}:
+    description: "{{ActionDescription}}"
+    inputs:
+        {{Input1Name}}: {{Input1Type}}
+            description: "{{Input1Description}}"
+        {{Input2Name}}: {{Input2Type}}
+            description: "{{Input2Description}}"
+    outputs:
+        {{Output1Name}}: {{Output1Type}}
+            description: "{{Output1Description}}"
+        {{Output2Name}}: {{Output2Type}}
+            description: "{{Output2Description}}"
+    target: "flow://{{FlowApiName}}"
+
+# Usage in reasoning block:
+# reasoning:
+#     actions:
+#         invoke_{{ActionName}}: @actions.{{ActionName}}
+#             with {{Input1Name}}=...  # LLM fills from conversation
+#             with {{Input2Name}}=@variables.some_var  # From variable
+#             set @variables.result1 = @outputs.{{Output1Name}}
+#             set @variables.result2 = @outputs.{{Output2Name}}
+
+# Common Flow Target Patterns:
+# - flow://Get_Account_Details
+# - flow://Create_Case
+# - flow://Update_Opportunity
+# - flow://Send_Email_Notification
+# - flow://Calculate_Discount
+
+# Input Types: string, number, boolean, list[string], object
+# Output Types: string, number, boolean, list[object]
