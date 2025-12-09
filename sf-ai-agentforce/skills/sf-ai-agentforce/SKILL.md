@@ -101,6 +101,65 @@ actions:
 
 ---
 
+## ⚠️ CRITICAL: Action Definitions Location
+
+**Actions with `target:` MUST be defined INSIDE topics, NOT at the top level.**
+
+```agentscript
+# ❌ WRONG - Top-level actions block causes SyntaxError: "Unexpected 'actions'"
+actions:
+    get_account:
+        description: "Gets account"
+        target: "flow://Get_Account"
+
+start_agent topic_selector:
+    ...
+
+# ✅ CORRECT - Actions defined inside the topic that uses them
+topic account_lookup:
+    label: "Account Lookup"
+    description: "Looks up account information"
+
+    actions:
+        get_account:
+            description: "Retrieves account information"
+            inputs:
+                account_id: string
+                    description: "Salesforce Account ID"
+            outputs:
+                account_name: string
+                    description: "Account name"
+            target: "flow://Get_Account_Info"
+
+    reasoning:
+        instructions: ->
+            | Help the user look up account information.
+        actions:
+            lookup: @actions.get_account
+                with account_id=...
+                set @variables.account_name = @outputs.account_name
+```
+
+**Note**: Each topic can define its own actions. Actions are scoped to the topic they are defined in.
+
+---
+
+## ⚠️ CRITICAL: Action Target Validation
+
+**The `flow://` and `apex://` targets are validated during publish. The referenced Flow or Apex class MUST exist in the org.**
+
+```bash
+# This will fail if "My_Flow" does not exist in the org:
+# Error: "Invocation Target: bad value for restricted picklist field: My_Flow"
+target: "flow://My_Flow"
+```
+
+**Deployment Order**:
+1. Deploy Flows/Apex classes first using `sf project deploy start`
+2. Then publish the agent using `sf agent publish authoring-bundle`
+
+---
+
 ## Workflow (5-Phase Pattern)
 
 ### Phase 1: Requirements Gathering
@@ -449,33 +508,52 @@ system:
 
 ### Action Definitions
 
-```agentscript
-# Flow-based action
-get_account:
-    description: "Retrieves account information"
-    inputs:
-        account_id: string
-            description: "Salesforce Account ID"
-    outputs:
-        account_name: string
-            description: "Account name"
-        industry: string
-            description: "Account industry"
-    target: "flow://Get_Account_Info"
+**⚠️ IMPORTANT**: Actions must be defined INSIDE a topic, not at the top level. See the "CRITICAL: Action Definitions Location" section above.
 
-# Apex-based action
-create_case:
-    description: "Creates a support case"
-    inputs:
-        subject: string
-            description: "Case subject"
-        description: string
-            description: "Case description"
-    outputs:
-        case_id: string
-            description: "Created case ID"
-    target: "apex://CaseService.createCase"
+```agentscript
+# Actions are defined inside the topic that uses them
+topic account_management:
+    label: "Account Management"
+    description: "Manages account lookups and case creation"
+
+    # Define actions available to this topic
+    actions:
+        # Flow-based action
+        get_account:
+            description: "Retrieves account information"
+            inputs:
+                account_id: string
+                    description: "Salesforce Account ID"
+            outputs:
+                account_name: string
+                    description: "Account name"
+                industry: string
+                    description: "Account industry"
+            target: "flow://Get_Account_Info"
+
+        # Apex-based action
+        create_case:
+            description: "Creates a support case"
+            inputs:
+                subject: string
+                    description: "Case subject"
+                case_desc: string
+                    description: "Case description"
+            outputs:
+                case_id: string
+                    description: "Created case ID"
+            target: "apex://CaseService.createCase"
+
+    reasoning:
+        instructions: ->
+            | Help the user with account and case management.
+        actions:
+            lookup: @actions.get_account
+                with account_id=...
+                set @variables.account_name = @outputs.account_name
 ```
+
+**Note**: The Flow or Apex class referenced in `target:` must exist in the org before publishing the agent.
 
 ### Action Invocation
 
@@ -757,6 +835,8 @@ topic order_processing:
 | Pipe syntax in system: | SyntaxError | Use single quoted string for system instructions |
 | Inline escalate description | SyntaxError | Put `description:` on separate indented line |
 | Invalid default_agent_user | Internal Error | Use valid org user with Agentforce permissions |
+| Top-level actions block | SyntaxError: "Unexpected 'actions'" | Define actions INSIDE topics |
+| Non-existent Flow/Apex target | Publish fails with picklist error | Deploy Flow/Apex before agent |
 
 ---
 
@@ -817,6 +897,8 @@ python3 ~/.claude/plugins/marketplaces/sf-skills/sf-agentforce/hooks/scripts/val
 | **System Instructions** | Pipe `\|` syntax fails in system: block | Use single quoted string only |
 | **Escalate Description** | Inline description fails | Put `description:` on separate indented line |
 | **Agent User** | Invalid user causes "Internal Error" | Use valid org user with proper permissions |
+| **Action Placement** | Top-level `actions:` block causes SyntaxError | Define actions INSIDE topics, not at top level |
+| **Action Target Validation** | `flow://` and `apex://` targets validated at publish | Deploy Flows/Apex BEFORE publishing agent |
 
 ---
 
