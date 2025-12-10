@@ -4,11 +4,31 @@ This guide documents tested Agent Script patterns and common deployment issues b
 
 ## Deployment Methods
 
-There are **two ways** to deploy Agentforce agents:
+There are **two ways** to deploy Agentforce agents, each with **different capabilities and limitations**:
+
+### ⚠️ CRITICAL: Method Comparison
+
+| Aspect | GenAiPlannerBundle | AiAuthoringBundle |
+|--------|-------------------|-------------------|
+| Command | `sf project deploy start` | `sf agent publish authoring-bundle` |
+| **Visible in Agentforce Studio** | ❌ NO | ✅ YES |
+| Flow Actions (`flow://`) | ✅ Supported | ❌ NOT Supported |
+| Escalation (`@utils.escalate`) | ✅ Supported | ❌ NOT Supported |
+| Topic Transitions | ✅ Supported | ✅ Supported |
+| Variables | ✅ No default required | ⚠️ Requires default value |
+| API Version | v65.0+ required | v64.0+ |
+
+**Choose your method based on requirements:**
+- **Need visible agents in Agentforce Studio?** → Use AiAuthoringBundle (but limited features)
+- **Need flow actions or escalation?** → Use GenAiPlannerBundle (but not visible in UI)
+
+---
 
 ### 1. Metadata API (GenAiPlannerBundle)
 
-Uses standard `sf project deploy start` with `genAiPlannerBundles/` directory:
+Uses standard `sf project deploy start` with `genAiPlannerBundles/` directory.
+
+**⚠️ IMPORTANT:** Agents deployed this way exist in org metadata but do **NOT appear in Agentforce Studio UI**!
 
 ```
 force-app/main/default/genAiPlannerBundles/
@@ -18,19 +38,65 @@ force-app/main/default/genAiPlannerBundles/
         └── My_Agent_definition.agent         # Agent Script file
 ```
 
+**XML Manifest:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Agent description</description>
+    <masterLabel>Agent Label</masterLabel>
+    <plannerType>Atlas__ConcurrentMultiAgentOrchestration</plannerType>
+</GenAiPlannerBundle>
+```
+
 **Requirements:**
 - `sourceApiVersion: "65.0"` in sfdx-project.json (v65+ required!)
 - XML bundle file + Agent Script file in `agentScript/` subfolder
 
-### 2. Agent Builder DX (authoring-bundle)
+**Supported Features:**
+- ✅ Flow actions with `target: "flow://FlowName"`
+- ✅ Escalation with `@utils.escalate with reason="..."`
+- ✅ Action input/output mapping with `with`/`set` syntax
+- ✅ All variable types without default values
 
-Uses `sf agent publish authoring-bundle` with `aiAuthoringBundles/` directory:
+---
+
+### 2. Agent Builder DX (AiAuthoringBundle)
+
+Uses `sf agent publish authoring-bundle` with `aiAuthoringBundles/` directory.
+
+**✅ Agents deployed this way ARE visible in Agentforce Studio!**
 
 ```
 force-app/main/default/aiAuthoringBundles/
 └── My_Agent/
     ├── My_Agent.bundle-meta.xml
     └── My_Agent.agent
+```
+
+**XML Manifest:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<AiAuthoringBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+  <bundleType>AGENT</bundleType>
+</AiAuthoringBundle>
+```
+
+**Supported Features:**
+- ✅ Topic transitions with `@utils.transition to @topic.name`
+- ✅ Variables with default values
+- ✅ Conditionals and template expressions
+- ❌ Flow actions (causes "Internal Error")
+- ❌ Escalation syntax `@utils.escalate with reason="..."` (causes SyntaxError)
+
+**Variable Syntax Difference:**
+```agentscript
+# GenAiPlannerBundle (works without default)
+user_name: mutable string
+    description: "User's name"
+
+# AiAuthoringBundle (REQUIRES default value)
+user_name: mutable string = ""
+    description: "User's name"
 ```
 
 ---

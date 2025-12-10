@@ -10,7 +10,26 @@ Complete syntax reference for the Agent Script language used in Agentforce.
 
 Agent Script files use the `.agent` extension and contain YAML-like syntax with specific Agent Script keywords.
 
-**Required Files** (per agent):
+### ⚠️ CRITICAL: Two Deployment Methods
+
+There are **two deployment methods** with **different capabilities**:
+
+| Aspect | GenAiPlannerBundle | AiAuthoringBundle |
+|--------|-------------------|-------------------|
+| Deploy Command | `sf project deploy start` | `sf agent publish authoring-bundle` |
+| **Visible in Agentforce Studio** | ❌ NO | ✅ YES |
+| Flow Actions (`flow://`) | ✅ Supported | ❌ NOT Supported |
+| Escalation (`@utils.escalate with reason`) | ✅ Supported | ❌ NOT Supported |
+| Variables without defaults | ✅ Supported | ❌ Requires default value |
+| API Version | v65.0+ required | v64.0+ |
+
+---
+
+### AiAuthoringBundle (Visible in Agentforce Studio)
+
+**Use this when**: You need agents visible in Agentforce Studio UI.
+
+**Required Files**:
 ```
 force-app/main/default/aiAuthoringBundles/[AgentName]/
 ├── [AgentName].agent           # Agent definition
@@ -24,6 +43,32 @@ force-app/main/default/aiAuthoringBundles/[AgentName]/
   <bundleType>AGENT</bundleType>
 </AiAuthoringBundle>
 ```
+
+---
+
+### GenAiPlannerBundle (Full Feature Support)
+
+**Use this when**: You need flow actions, escalation with reasons, or full Agent Script syntax.
+
+**Required Files**:
+```
+force-app/main/default/genAiPlannerBundles/[AgentName]/
+├── [AgentName].genAiPlannerBundle  # XML manifest
+└── agentScript/
+    └── [AgentName]_definition.agent  # Agent Script file
+```
+
+**genAiPlannerBundle content**:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Agent description</description>
+    <masterLabel>Agent Label</masterLabel>
+    <plannerType>Atlas__ConcurrentMultiAgentOrchestration</plannerType>
+</GenAiPlannerBundle>
+```
+
+**⚠️ WARNING**: Agents deployed via GenAiPlannerBundle exist in org metadata but do **NOT appear** in Agentforce Studio UI!
 
 ### Block Order (CRITICAL)
 
@@ -185,6 +230,10 @@ variables:
 ```
 
 **Mutable Variables** (agent state):
+
+⚠️ **IMPORTANT**: Syntax differs by deployment method!
+
+**GenAiPlannerBundle** (no default required):
 ```agentscript
 variables:
     user_name: mutable string
@@ -192,6 +241,17 @@ variables:
     order_count: mutable number
         description: "Number of items in cart"
     is_verified: mutable boolean
+        description: "Whether identity is verified"
+```
+
+**AiAuthoringBundle** (default value REQUIRED):
+```agentscript
+variables:
+    user_name: mutable string = ""
+        description: "The customer's name"
+    order_count: mutable number = 0
+        description: "Number of items in cart"
+    is_verified: mutable boolean = False
         description: "Whether identity is verified"
 ```
 
@@ -417,6 +477,10 @@ topic my_topic:
 | Flow | `flow://FlowName` | `flow://Get_Order_Details` |
 | Apex | `apex://ClassName.methodName` | `apex://OrderService.getOrder` |
 
+⚠️ **CRITICAL**: Flow actions (`flow://`) are **ONLY supported in GenAiPlannerBundle** deployment!
+- AiAuthoringBundle will fail with "Internal Error, try again later" if flow actions are used
+- For visible agents that need flow actions, you must use GenAiPlannerBundle (but agent won't appear in UI)
+
 ### Invoking Actions
 
 ```agentscript
@@ -485,6 +549,7 @@ go_checkout: @utils.transition to @topic.checkout
 
 ### Escalation to Human
 
+**AiAuthoringBundle** (basic escalation only):
 ```agentscript
 topic escalation:
     label: "Escalation"
@@ -498,12 +563,36 @@ topic escalation:
                 description: "Escalate to a human agent"
 ```
 
+**GenAiPlannerBundle** (supports reason parameter):
+```agentscript
+reasoning:
+    actions:
+        escalate_human: @utils.escalate with reason="Customer requested human agent"
+```
+
+⚠️ **CRITICAL**: The `with reason="..."` syntax is **ONLY supported in GenAiPlannerBundle**!
+- AiAuthoringBundle will fail with `SyntaxError: Unexpected 'with'` or `SyntaxError: Unexpected 'escalate'`
+- Use the basic `@utils.escalate` with `description:` for AiAuthoringBundle agents
+
 ---
 
 ## Deployment
 
-### Publish Command
+### Choose Your Deployment Method
 
+| Need | Method | Command |
+|------|--------|---------|
+| Agent visible in Agentforce Studio | AiAuthoringBundle | `sf agent publish authoring-bundle` |
+| Flow actions (`flow://`) | GenAiPlannerBundle | `sf project deploy start` |
+| Escalation with reason | GenAiPlannerBundle | `sf project deploy start` |
+| Variables without defaults | GenAiPlannerBundle | `sf project deploy start` |
+| Both visibility AND flow actions | ❌ Not currently possible | - |
+
+---
+
+### AiAuthoringBundle Deployment
+
+**Deploy command**:
 ```bash
 sf agent publish authoring-bundle --api-name [AgentName] --target-org [alias]
 ```
@@ -512,11 +601,9 @@ This command:
 - Validates Agent Script syntax
 - Creates Bot, BotVersion, GenAi metadata
 - Deploys the AiAuthoringBundle
+- **Agent appears in Agentforce Studio** ✅
 
-**Do NOT use** `sf project deploy start` for Agent Script files.
-
-### Other Commands
-
+**Other commands**:
 ```bash
 # Validate without publishing
 sf agent validate authoring-bundle --api-name [AgentName] --target-org [alias]
@@ -527,6 +614,32 @@ sf org open agent --api-name [AgentName] --target-org [alias]
 # Activate agent
 sf agent activate --api-name [AgentName] --target-org [alias]
 ```
+
+---
+
+### GenAiPlannerBundle Deployment
+
+**Deploy command**:
+```bash
+sf project deploy start --source-dir force-app/main/default/genAiPlannerBundles/[AgentName] --target-org [alias]
+
+# Or deploy all agent bundles
+sf project deploy start --metadata GenAiPlannerBundle --target-org [alias]
+```
+
+This command:
+- Deploys agent to org metadata
+- Supports full Agent Script syntax (flow actions, escalation with reason)
+- ⚠️ **Agent does NOT appear in Agentforce Studio UI**
+
+**Retrieve command**:
+```bash
+sf project retrieve start --metadata "GenAiPlannerBundle:[AgentName]" --target-org [alias]
+```
+
+**Requirements**:
+- `sourceApiVersion: "65.0"` or higher in sfdx-project.json
+- Flows must be deployed before agent if using `flow://` targets
 
 ---
 
@@ -621,6 +734,10 @@ instructions: ->
 | Missing label | Topic without label | Add `label:` to all topics |
 | Wrong config field | Using `agent_name` | Use `developer_name` |
 | Missing space | `instructions:->` | Use `instructions: ->` |
+| Internal Error, try again later | Flow action in AiAuthoringBundle | Use GenAiPlannerBundle for flow actions |
+| SyntaxError: Unexpected 'with' | Escalate with reason in AiAuthoringBundle | Use basic `@utils.escalate` or GenAiPlannerBundle |
+| SyntaxError: Unexpected 'escalate' | Invalid escalation syntax in AiAuthoringBundle | Use GenAiPlannerBundle for `with reason=` syntax |
+| Variable requires default | Mutable variable without `= value` in AiAuthoringBundle | Add `= ""` or `= 0` or `= False` |
 
 ---
 
@@ -637,3 +754,7 @@ instructions: ->
 | No bundle XML | Deploy fails | Create `.bundle-meta.xml` |
 | No language block | Deploy fails | Add `language:` block |
 | Missing linked vars | Missing context | Add EndUserId, RoutableId, ContactId |
+| `flow://` in AiAuthoringBundle | Internal Error | Use GenAiPlannerBundle for flow actions |
+| `@utils.escalate with reason=` in AiAuthoringBundle | SyntaxError | Use basic escalation or GenAiPlannerBundle |
+| `mutable string` without `= ""` in AiAuthoringBundle | Variable error | Add default value |
+| Expecting UI visibility with GenAiPlannerBundle | Agent not visible | Use AiAuthoringBundle for UI visibility |
