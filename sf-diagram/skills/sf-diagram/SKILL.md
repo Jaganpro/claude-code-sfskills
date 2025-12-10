@@ -134,6 +134,20 @@ Score: XX/80 ⭐⭐⭐⭐ Rating
 
 Use individual `style` declarations with **Tailwind 200-level pastel fills** and **dark strokes** for consistent, visually soft diagrams.
 
+### Spacing Configuration
+
+Add this init directive at the start of every flowchart for optimal readability:
+
+```
+%%{init: {"flowchart": {"nodeSpacing": 80, "rankSpacing": 70, "curve": "linear"}} }%%
+```
+
+| Option | Value | Effect |
+|--------|-------|--------|
+| `nodeSpacing` | 80 | 60% more horizontal space (default: 50) |
+| `rankSpacing` | 70 | 40% more vertical space (default: 50) |
+| `curve` | "linear" | Straight lines for clean, technical look |
+
 ### Primary Color Palette (Tailwind 200 + Dark Borders)
 
 | Component | Fill (200) | Stroke (700+) | Text | Usage |
@@ -172,17 +186,19 @@ flowchart TB
     style B fill:#ddd6fe,stroke:#6d28d9,color:#1f2937
 ```
 
-**AVOID `%%{init}` blocks** - they're harder to maintain and less flexible.
+**Note**: Use `%%{init}` for spacing/curve config only. Avoid using it for color theming (use individual `style` declarations instead).
 
 ### Subgraph Styling
 
 Use 50-level backgrounds with dark dashed borders. Use UPPERCASE for subgraph titles:
 ```mermaid
-subgraph ai["🤖 AI & AGENTS"]
-    A[Agent]
-end
+%%{init: {"flowchart": {"nodeSpacing": 80, "rankSpacing": 70, "curve": "linear"}} }%%
+flowchart TB
+    subgraph ai["🤖 AI & AGENTS"]
+        A[Agent]
+    end
 
-style ai fill:#fdf2f8,stroke:#be185d,stroke-dasharray:5
+    style ai fill:#fdf2f8,stroke:#be185d,stroke-dasharray:5
 ```
 
 ### Node Label Pattern

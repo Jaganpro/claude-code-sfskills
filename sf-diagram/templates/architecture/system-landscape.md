@@ -11,6 +11,7 @@ Flowchart template for visualizing high-level Salesforce system architecture usi
 ## Mermaid Template - Sales Cloud Integration Landscape
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 80, "rankSpacing": 70, "curve": "linear"}} }%%
 flowchart TB
     subgraph users["👥 USERS"]
         direction LR
@@ -143,6 +144,7 @@ flowchart TB
 ## Mermaid Template - Agentforce Architecture
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 80, "rankSpacing": 70, "curve": "linear"}} }%%
 flowchart TB
     subgraph channels["📱 CHANNELS"]
         WEB["🌐 Web Chat<br/><small>Embedded</small>"]

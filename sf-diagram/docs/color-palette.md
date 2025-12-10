@@ -103,6 +103,48 @@ flowchart LR
 
 ---
 
+## Spacing Configuration
+
+Control diagram density with `%%{init}` configuration:
+
+```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 80, "rankSpacing": 70, "curve": "linear"}} }%%
+```
+
+### Available Spacing Options
+
+| Option | Default | Recommended | Effect |
+|--------|---------|-------------|--------|
+| `nodeSpacing` | 50 | 80 | Horizontal gap between nodes |
+| `rankSpacing` | 50 | 70 | Vertical gap between levels |
+| `diagramPadding` | 20 | 20-30 | Padding around entire diagram |
+| `padding` | 15 | 15 | Padding between label and shape |
+
+### Curve Styles
+
+| Style | Effect | Best For |
+|-------|--------|----------|
+| `"basis"` | Smooth curves (default) | Organic, flowing diagrams |
+| `"linear"` | Straight lines | Technical, clean diagrams |
+| `"stepBefore"` | Step/staircase lines | Very structured diagrams |
+
+### Recommended Configuration
+
+For clean, readable diagrams:
+
+```
+%%{init: {"flowchart": {"nodeSpacing": 80, "rankSpacing": 70, "curve": "linear"}} }%%
+```
+
+**Why these values?**
+- **nodeSpacing: 80** — 60% more horizontal space than default
+- **rankSpacing: 70** — 40% more vertical space than default
+- **curve: linear** — Cleaner, more technical appearance
+
+**⚠️ Limitation**: Subgraphs may not fully inherit spacing settings due to a [known Mermaid issue](https://github.com/mermaid-js/mermaid/issues/5178).
+
+---
+
 ## Mermaid Styling Approach
 
 ### Preferred: Individual Node Styling
@@ -129,6 +171,7 @@ flowchart TB
 Use 50-level backgrounds with dark dashed borders:
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 80, "rankSpacing": 70, "curve": "linear"}} }%%
 flowchart TB
     subgraph ai["🤖 AI & AGENTS"]
         A[Agent]
@@ -169,6 +212,7 @@ Keep labels short for consistent rendering.
 Copy this template for consistent diagrams with the finalized color scheme:
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 80, "rankSpacing": 70, "curve": "linear"}} }%%
 flowchart TB
     subgraph ai["🤖 AI & AGENTS"]
         agentforce["🤖 sf-ai-agentforce"]
