@@ -26,13 +26,23 @@ sf-apex/
 
 ### Why Use Skills?
 
-| Without Skills | With Skills |
-|----------------|-------------|
-| ❌ Explain best practices every conversation | ✅ AI already knows the standards |
-| ❌ Manually review code for anti-patterns | ✅ Auto-validation on every file save |
-| ❌ Copy-paste boilerplate repeatedly | ✅ Production-ready templates built-in |
-| ❌ Remember CLI commands and flags | ✅ Skill handles tool orchestration |
-| ❌ Burn tokens on lengthy system prompts | ✅ Skills load on-demand, saving context |
+> 🚀 **Stop explaining Salesforce patterns. Start building.**
+
+**1. Instant Expertise** — AI knows Trigger Actions Framework, Flow bulkification, deployment best practices from the first message.
+
+**2. Automatic Validation** — Every Apex class, Flow, and agent script is scored against 100-150 point rubrics. Catch anti-patterns before deployment.
+
+**3. Built-in Templates** — 50+ production-ready templates across Apex, Flow, Metadata, Agentforce, and more.
+
+**4. Tool Orchestration** — "Deploy to production" becomes a single command. Skills handle `sf` CLI complexity.
+
+**5. Context Efficiency** — Skills load only when invoked, saving ~2000 tokens per conversation vs. pasting prompts.
+
+| Before | After |
+|--------|-------|
+| ❌ Prompt engineering every conversation | ✅ `Skill(skill="sf-apex")` |
+| ❌ 10+ messages to explain requirements | ✅ 1 message, skill fills the gaps |
+| ❌ Review code manually for issues | ✅ Hooks validate on every save |
 
 ---
 
