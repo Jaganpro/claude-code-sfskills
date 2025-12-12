@@ -92,17 +92,29 @@ If API version < 64, Agent Script features won't be available.
 
 ## ⚠️ CRITICAL: Indentation Rules
 
-**Agent Script uses 3-SPACE indentation (NOT tabs, NOT 4 spaces)**
+**Agent Script is whitespace-sensitive (like Python/YAML). Use CONSISTENT indentation throughout.**
+
+| Rule | Details |
+|------|---------|
+| **Spaces** | 2, 3, or 4 spaces all work |
+| **Tabs** | Tabs work if used consistently |
+| **Mixing** | ❌ NEVER mix tabs and spaces (causes parse errors) |
+| **Consistency** | All lines at same nesting level must use same indentation |
 
 ```agentscript
-# ✅ CORRECT - 3 spaces
+# ✅ CORRECT - consistent 3 spaces (recommended for readability)
 config:
    agent_name: "My_Agent"
    description: "My agent description"
 
-# ❌ WRONG - 4 spaces (common mistake!)
+# ✅ ALSO CORRECT - consistent 2 spaces
 config:
-    agent_name: "My_Agent"
+  agent_name: "My_Agent"
+
+# ❌ WRONG - mixing tabs and spaces
+config:
+	agent_name: "My_Agent"    # tab
+   description: "My agent"    # spaces - PARSE ERROR!
 ```
 
 ---
@@ -608,7 +620,7 @@ Score: 85/100 ⭐⭐⭐⭐ Very Good
 └─ Security & Guardrails:   8/10 (80%)
 
 Issues:
-⚠️ [Syntax] Line 15: Use 3-space indentation, found 4 spaces
+⚠️ [Syntax] Line 15: Inconsistent indentation (mixing tabs and spaces)
 ⚠️ [Topic] Missing label for topic 'checkout'
 ✓ All topic references valid
 ✓ All variable references valid
@@ -1091,7 +1103,7 @@ instructions: ->
 
 ### Structure & Syntax (20 points)
 - Valid Agent Script syntax (-10 if parsing fails)
-- Correct 3-space indentation (-3 per violation)
+- Consistent indentation (no mixing tabs/spaces) (-3 per violation)
 - Required blocks present (system, config, start_agent, language) (-5 each missing)
 - Uses `agent_name` not `developer_name` (-5 if wrong)
 - File extension is `.agent` (-5 if wrong)
@@ -1594,7 +1606,7 @@ python3 ~/.claude/plugins/marketplaces/sf-skills/sf-agentforce/hooks/scripts/val
 | Linked Variables | Missing context variables | Add EndUserId, RoutableId, ContactId |
 | Language Block | Missing causes deploy failure | Add `language:` block |
 | Bundle XML | Missing causes deploy failure | Create `.bundle-meta.xml` file |
-| **3-Space Indentation** | **4 spaces causes parse errors** | **Always use 3 spaces** |
+| **Indentation Consistency** | **Mixing tabs/spaces causes parse errors** | **Pick one method (2/3/4 spaces or tabs) and be consistent** |
 | `@variables` is plural | `@variable.x` fails | Use `@variables.x` |
 | Boolean capitalization | `true/false` invalid | Use `True/False` |
 | Deploy Command | `sf project deploy` fails | Use `sf agent publish authoring-bundle` |
