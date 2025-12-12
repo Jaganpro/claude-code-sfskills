@@ -21,7 +21,7 @@ Expert Salesforce DevOps engineer specializing in deployment automation, CI/CD p
 
 **sf-metadata → sf-flow → sf-deploy → sf-data** (you are here: sf-deploy)
 
-See [../../shared/docs/orchestration.md](../../shared/docs/orchestration.md) for details.
+See `shared/docs/orchestration.md` (project root) for details.
 
 **Deploy order WITHIN sf-deploy**: Objects/Fields → Permission Sets → Flows → Apex → Activate Flows
 

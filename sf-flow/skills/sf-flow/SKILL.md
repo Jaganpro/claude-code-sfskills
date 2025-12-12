@@ -40,7 +40,7 @@ python3 ~/.claude/plugins/marketplaces/sf-skills/sf-flow-builder/hooks/scripts/v
 
 ⚠️ ALL deployments MUST go through **sf-devops-architect** sub-agent (which delegates to sf-deploy).
 
-See [../../shared/docs/orchestration.md](../../shared/docs/orchestration.md) for details.
+See `shared/docs/orchestration.md` (project root) for details.
 
 ---
 
@@ -66,22 +66,26 @@ Use **AskUserQuestion** to gather:
 
 **Then**:
 1. Check existing flows: `Glob: pattern="**/*.flow-meta.xml"`
-2. Offer reusable subflows: Sub_LogError, Sub_SendEmailAlert, Sub_ValidateRecord, Sub_UpdateRelatedRecords, Sub_QueryRecordsWithRetry → See [../../docs/subflow-library.md](../../docs/subflow-library.md)
-3. If complex automation: Reference [../../docs/governance-checklist.md](../../docs/governance-checklist.md)
+2. Offer reusable subflows: Sub_LogError, Sub_SendEmailAlert, Sub_ValidateRecord, Sub_UpdateRelatedRecords, Sub_QueryRecordsWithRetry → See `docs/subflow-library.md` (in sf-flow folder)
+3. If complex automation: Reference `docs/governance-checklist.md` (in sf-flow folder)
 4. Create TodoWrite tasks: Gather requirements ✓, Select template, Generate XML, Validate, Deploy, Test
 
 ### Phase 2: Flow Design & Template Selection
 
 **Select template**:
-| Flow Type | Template |
-|-----------|----------|
-| Screen | `../../templates/screen-flow-template.xml` |
-| Record-Triggered | `../../templates/record-triggered-*.xml` |
-| Platform Event | `../../templates/platform-event-flow-template.xml` |
-| Autolaunched | `../../templates/autolaunched-flow-template.xml` |
-| Scheduled | `../../templates/scheduled-flow-template.xml` |
+| Flow Type | Template File |
+|-----------|---------------|
+| Screen | `screen-flow-template.xml` |
+| Record-Triggered | `record-triggered-*.xml` |
+| Platform Event | `platform-event-flow-template.xml` |
+| Autolaunched | `autolaunched-flow-template.xml` |
+| Scheduled | `scheduled-flow-template.xml` |
 
-Load via: `Read: ../../templates/[template].xml` (relative to SKILL.md location)
+**Template Path Resolution** (try in order):
+1. **Marketplace folder**: `~/.claude/plugins/marketplaces/sf-skills/sf-flow/templates/[template].xml`
+2. **Project folder**: `[project-root]/sf-flow/templates/[template].xml`
+
+**Example**: `Read: ~/.claude/plugins/marketplaces/sf-skills/sf-flow/templates/record-triggered-flow-template.xml`
 
 **Naming Convention** (Recommended Prefixes):
 
@@ -106,7 +110,7 @@ Load via: `Read: ../../templates/[template].xml` (relative to SKILL.md location)
 Rule: `allowFinish="true"` required on all screens. Connector present → "Next", absent → "Finish".
 
 **Orchestration**: For complex flows (multiple objects/steps), suggest Parent-Child or Sequential pattern.
-- **CRITICAL**: Record-triggered flows CANNOT call subflows via XML deployment. Use inline orchestration instead. See [../../docs/xml-gotchas.md](../../docs/xml-gotchas.md#subflow-calling-limitation) and [../../docs/orchestration-guide.md](../../docs/orchestration-guide.md)
+- **CRITICAL**: Record-triggered flows CANNOT call subflows via XML deployment. Use inline orchestration instead. See `docs/xml-gotchas.md` (in sf-flow) and `docs/orchestration-guide.md` (in sf-flow)
 
 ### Phase 3: Flow Generation & Validation
 
@@ -181,11 +185,11 @@ Score: 92/110 ⭐⭐⭐⭐ Very Good
 
 **For Agentforce Flows**: Variable names must match Agent Script input/output names exactly.
 
-For complex flows: [../../docs/governance-checklist.md](../../docs/governance-checklist.md)
+For complex flows: `docs/governance-checklist.md` (in sf-flow)
 
 ### Phase 5: Testing & Documentation
 
-**Type-specific testing**: See [../../docs/testing-guide.md](../../docs/testing-guide.md) | [../../docs/testing-checklist.md](../../docs/testing-checklist.md)
+**Type-specific testing**: See `docs/testing-guide.md` | `docs/testing-checklist.md`
 
 Quick reference:
 - **Screen**: Setup → Flows → Run, test all paths/profiles
@@ -193,7 +197,7 @@ Quick reference:
 - **Autolaunched**: Apex test class, edge cases, bulkification
 - **Scheduled**: Verify schedule, manual Run first, monitor logs
 
-**Best Practices**: See [../../docs/flow-best-practices.md](../../docs/flow-best-practices.md) for:
+**Best Practices**: See `docs/flow-best-practices.md` (in sf-flow) for:
 - Three-tier error handling strategy
 - Multi-step DML rollback patterns
 - Screen flow UX guidelines
@@ -212,7 +216,7 @@ Quick reference:
   Navigate: Setup → Process Automation → Flows → "[FlowName]"
 
 Next Steps: Test (unit, bulk, security), Review docs, Activate if Draft, Monitor logs
-Resources: ../../examples/, ../../docs/subflow-library.md, ../../docs/orchestration-guide.md, ../../docs/governance-checklist.md
+Resources: `examples/`, `docs/subflow-library.md`, `docs/orchestration-guide.md`, `docs/governance-checklist.md` (in sf-flow folder)
 ```
 
 ## Best Practices (Built-In Enforcement)
@@ -286,7 +290,7 @@ screens → start → status → subflows → textTemplates → variables → wa
 - **Button Names (v2.0.0)**: `Action_[Verb]_[Object]` (e.g., `Action_Save_Contact`)
 - **System vs User Mode**: Understand implications, validate FLS for sensitive fields
 - **No hardcoded data**: Use variables/custom settings
-- See [../../docs/flow-best-practices.md](../../docs/flow-best-practices.md) for comprehensive guidance
+- See `docs/flow-best-practices.md` (in sf-flow) for comprehensive guidance
 
 ## Common Error Patterns
 
@@ -303,7 +307,7 @@ screens → start → status → subflows → textTemplates → variables → wa
 | "Parent.Field doesn't exist" | Use TWO Get Records (child then parent) |
 | `$Record__c` loop fails | Use `$Record` directly (single context, not collection) |
 
-**XML Gotchas**: See [../../docs/xml-gotchas.md](../../docs/xml-gotchas.md)
+**XML Gotchas**: See `docs/xml-gotchas.md` (in sf-flow)
 
 ## Edge Cases
 
@@ -321,7 +325,7 @@ screens → start → status → subflows → textTemplates → variables → wa
 
 ## Cross-Skill Integration
 
-See [../../shared/docs/cross-skill-integration.md](../../shared/docs/cross-skill-integration.md)
+See `shared/docs/cross-skill-integration.md` (project root)
 
 **Deployment**: See Phase 4 above - sf-devops-architect is MANDATORY.
 

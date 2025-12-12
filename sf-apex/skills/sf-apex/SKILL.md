@@ -44,7 +44,11 @@ Use **AskUserQuestion** to gather:
 | Test Data Factory | `templates/test-data-factory.cls` |
 | Standard Class | `templates/apex-class.cls` |
 
-Load via: `Read: ../../templates/[template]` (relative to SKILL.md location)
+**Template Path Resolution** (try in order):
+1. **Marketplace folder**: `~/.claude/plugins/marketplaces/sf-skills/sf-apex/templates/[template]`
+2. **Project folder**: `[project-root]/sf-apex/templates/[template]`
+
+**Example**: `Read: ~/.claude/plugins/marketplaces/sf-skills/sf-apex/templates/apex-class.cls`
 
 ### Phase 3: Code Generation/Review
 
@@ -116,7 +120,7 @@ Next Steps: Run tests, verify behavior, monitor logs
 | **Performance** | 10 | Monitor with `Limits`; cache expensive ops; scope variables; async for heavy |
 | **Documentation** | 10 | ApexDoc on classes/methods; meaningful params |
 
-See [../../shared/docs/scoring-overview.md](../../shared/docs/scoring-overview.md) for thresholds. Block if <67 points.
+See `shared/docs/scoring-overview.md` (project root) for thresholds. Block if <67 points.
 
 ---
 
@@ -272,7 +276,7 @@ trigger LeadTrigger on Lead (before insert, before update) {
 **Pros**: No external dependencies, works in any org
 **Cons**: Less maintainable for complex triggers, no declarative control
 
-See [../../docs/trigger-actions-framework.md](../../docs/trigger-actions-framework.md) for full patterns.
+See `docs/trigger-actions-framework.md` (in sf-apex folder) for full patterns.
 
 ---
 
@@ -318,7 +322,8 @@ See [../../docs/trigger-actions-framework.md](../../docs/trigger-actions-framewo
 
 ## Reference
 
-**Docs**: `../../docs/` - best-practices, trigger-actions-framework, security-guide, testing-guide, naming-conventions, solid-principles, design-patterns, code-review-checklist
+**Docs**: `docs/` folder (in sf-apex) - best-practices, trigger-actions-framework, security-guide, testing-guide, naming-conventions, solid-principles, design-patterns, code-review-checklist
+- **Path**: `~/.claude/plugins/marketplaces/sf-skills/sf-apex/docs/`
 
 ---
 

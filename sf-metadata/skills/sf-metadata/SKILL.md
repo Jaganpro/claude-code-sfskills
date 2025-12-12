@@ -21,7 +21,7 @@ Expert Salesforce administrator specializing in metadata architecture, security 
 
 ⚠️ sf-data requires objects deployed to org. Always deploy BEFORE creating test data.
 
-See [../../shared/docs/orchestration.md](../../shared/docs/orchestration.md) for details.
+See `shared/docs/orchestration.md` (project root) for details.
 
 ---
 
@@ -80,7 +80,11 @@ Use **AskUserQuestion** to gather:
 | Record Type | `templates/record-types/record-type.xml` |
 | Page Layout | `templates/layouts/page-layout.xml` |
 
-Load via: `Read: ../../templates/[path]` (relative to SKILL.md location)
+**Template Path Resolution** (try in order):
+1. **Marketplace folder**: `~/.claude/plugins/marketplaces/sf-skills/sf-metadata/templates/[path]`
+2. **Project folder**: `[project-root]/sf-metadata/templates/[path]`
+
+**Example**: `Read: ~/.claude/plugins/marketplaces/sf-skills/sf-metadata/templates/objects/custom-object.xml`
 
 #### For Querying (sf CLI v2 Commands)
 
@@ -124,7 +128,7 @@ Custom Fields:
 
 2. Populate template with user requirements
 
-3. Apply naming conventions (see [../../docs/naming-conventions.md](../../docs/naming-conventions.md))
+3. Apply naming conventions (see `docs/naming-conventions.md` in sf-metadata folder)
 
 4. Run validation (automatic via hooks or manual)
 
@@ -288,7 +292,7 @@ Next Steps:
 
 ### Scoring
 
-See [../../shared/docs/scoring-overview.md](../../shared/docs/scoring-overview.md) | **Thresholds**: ⭐⭐⭐⭐⭐ 108+ | ⭐⭐⭐⭐ 96-107 | ⭐⭐⭐ 84-95 | Block: <72
+See `shared/docs/scoring-overview.md` (project root) | **Thresholds**: ⭐⭐⭐⭐⭐ 108+ | ⭐⭐⭐⭐ 96-107 | ⭐⭐⭐ 84-95 | Block: <72
 
 ---
 
@@ -379,7 +383,7 @@ See [../../shared/docs/scoring-overview.md](../../shared/docs/scoring-overview.m
 
 ## Cross-Skill Integration
 
-See [../../shared/docs/cross-skill-integration.md](../../shared/docs/cross-skill-integration.md)
+See `shared/docs/cross-skill-integration.md` (project root)
 
 | Direction | Pattern |
 |-----------|---------|
@@ -446,7 +450,8 @@ sf schema generate field --label "My Field" --object Account
 
 ## Reference & Dependencies
 
-**Docs**: `../../docs/` - metadata-types-reference, field-types-guide, fls-best-practices, naming-conventions
+**Docs**: `docs/` folder (in sf-metadata) - metadata-types-reference, field-types-guide, fls-best-practices, naming-conventions
+- **Path**: `~/.claude/plugins/marketplaces/sf-skills/sf-metadata/docs/`
 
 **Dependencies**: sf-deploy (optional) for deployment. Install: `/plugin install github:Jaganpro/sf-skills/sf-deploy`
 

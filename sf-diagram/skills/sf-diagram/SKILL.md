@@ -43,21 +43,29 @@ Use **AskUserQuestion** to gather:
 
 **Select template based on diagram type**:
 
-| Diagram Type | Template Location |
-|--------------|-------------------|
-| Authorization Code Flow | `templates/oauth/authorization-code.md` |
-| Authorization Code + PKCE | `templates/oauth/authorization-code-pkce.md` |
-| JWT Bearer Flow | `templates/oauth/jwt-bearer.md` |
-| Client Credentials Flow | `templates/oauth/client-credentials.md` |
-| Device Authorization Flow | `templates/oauth/device-authorization.md` |
-| Refresh Token Flow | `templates/oauth/refresh-token.md` |
-| Data Model (ERD) | `templates/datamodel/salesforce-erd.md` |
-| Integration Sequence | `templates/integration/api-sequence.md` |
-| System Landscape | `templates/architecture/system-landscape.md` |
-| Role Hierarchy | `templates/role-hierarchy/user-hierarchy.md` |
-| Agentforce Flow | `templates/agentforce/agent-flow.md` |
+| Diagram Type | Template File |
+|--------------|---------------|
+| Authorization Code Flow | `oauth/authorization-code.md` |
+| Authorization Code + PKCE | `oauth/authorization-code-pkce.md` |
+| JWT Bearer Flow | `oauth/jwt-bearer.md` |
+| Client Credentials Flow | `oauth/client-credentials.md` |
+| Device Authorization Flow | `oauth/device-authorization.md` |
+| Refresh Token Flow | `oauth/refresh-token.md` |
+| Data Model (ERD) | `datamodel/salesforce-erd.md` |
+| Integration Sequence | `integration/api-sequence.md` |
+| System Landscape | `architecture/system-landscape.md` |
+| Role Hierarchy | `role-hierarchy/user-hierarchy.md` |
+| Agentforce Flow | `agentforce/agent-flow.md` |
 
-Load via: `Read: ../../templates/[category]/[template]` (relative to SKILL.md location)
+**Template Path Resolution** (try in order):
+1. **Marketplace folder** (always available): `~/.claude/plugins/marketplaces/sf-skills/sf-diagram/templates/[template]`
+2. **Project folder** (if working in sf-skills repo): `[project-root]/sf-diagram/templates/[template]`
+3. **Cache folder** (if installed individually): `~/.claude/plugins/cache/sf-diagram/*/sf-diagram/templates/[template]`
+
+**Example**: To load JWT Bearer template:
+```
+Read: ~/.claude/plugins/marketplaces/sf-skills/sf-diagram/templates/oauth/jwt-bearer.md
+```
 
 ### Phase 3: Data Collection
 
@@ -141,7 +149,11 @@ After generating the diagram, offer the user a localhost preview for real-time i
 
 2. Start preview server (runs in background):
    ```bash
-   python sf-diagram/preview/mermaid_preview.py start --file /tmp/mermaid-preview.mmd
+   # From marketplace folder (always available):
+   python ~/.claude/plugins/marketplaces/sf-skills/sf-diagram/preview/mermaid_preview.py start --file /tmp/mermaid-preview.mmd
+
+   # Or from project folder (if working locally):
+   python [project-root]/sf-diagram/preview/mermaid_preview.py start --file /tmp/mermaid-preview.mmd
    ```
 
 3. Provide URL to user:
@@ -158,7 +170,7 @@ After generating the diagram, offer the user a localhost preview for real-time i
 
 **Stop Preview** (when user is done):
 ```bash
-python sf-diagram/preview/mermaid_preview.py stop
+python ~/.claude/plugins/marketplaces/sf-skills/sf-diagram/preview/mermaid_preview.py stop
 ```
 
 **Preview Server Features**:

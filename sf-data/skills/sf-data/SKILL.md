@@ -47,7 +47,7 @@ The sf-data skill provides comprehensive data management capabilities:
 
 sf-data REQUIRES objects to exist in org. Error `SObject type 'X' not supported` = deploy metadata first.
 
-See [../../shared/docs/orchestration.md](../../shared/docs/orchestration.md) for details.
+See `shared/docs/orchestration.md` (project root) for details.
 
 ---
 
@@ -66,7 +66,9 @@ See [../../shared/docs/orchestration.md](../../shared/docs/orchestration.md) for
 
 **Phase 1: Gather** → AskUserQuestion (operation type, object, org alias, record count) | Check existing: `Glob: **/*factory*.apex`
 
-**Phase 2: Template** → Select from `../../templates/` (factories/, bulk/, soql/, cleanup/)
+**Phase 2: Template** → Select from `templates/` folder (factories/, bulk/, soql/, cleanup/)
+- Marketplace: `~/.claude/plugins/marketplaces/sf-skills/sf-data/templates/`
+- Project: `[project-root]/sf-data/templates/`
 
 **Phase 3: Execute** → Run sf CLI command | Capture JSON output | Track record IDs
 
@@ -113,7 +115,7 @@ See [../../shared/docs/orchestration.md](../../shared/docs/orchestration.md) for
 | **Semi-Join** | `WHERE Id IN (SELECT ParentId FROM ...)` | Records WITH related |
 | **Anti-Join** | `WHERE Id NOT IN (SELECT ...)` | Records WITHOUT related |
 
-See `../../templates/soql/` for complete examples.
+See `templates/soql/` folder for complete examples (use marketplace or project path).
 
 ---
 
@@ -238,7 +240,7 @@ public class TestDataFactory_Lead_Extended {
 
 ## Cross-Skill Integration
 
-See [../../shared/docs/cross-skill-integration.md](../../shared/docs/cross-skill-integration.md)
+See `shared/docs/cross-skill-integration.md` (project root)
 
 | Direction | Pattern |
 |-----------|---------|
@@ -274,9 +276,10 @@ See [Salesforce Governor Limits](https://developer.salesforce.com/docs/atlas.en-
 
 ## Reference & Templates
 
-**Docs**: `../../docs/` - soql-relationship-guide, bulk-operations-guide, test-data-patterns, cleanup-rollback-guide
+**Docs**: `docs/` folder (in sf-data) - soql-relationship-guide, bulk-operations-guide, test-data-patterns, cleanup-rollback-guide
 
-**Templates**: `../../templates/factories/` (Account, Contact, Opportunity, hierarchy) | `../../templates/soql/` (parent-child, polymorphic) | `../../templates/bulk/` | `../../templates/cleanup/`
+**Templates**: `templates/factories/` (Account, Contact, Opportunity, hierarchy) | `templates/soql/` (parent-child, polymorphic) | `templates/bulk/` | `templates/cleanup/`
+- **Path**: `~/.claude/plugins/marketplaces/sf-skills/sf-data/templates/[subfolder]/`
 
 ---
 

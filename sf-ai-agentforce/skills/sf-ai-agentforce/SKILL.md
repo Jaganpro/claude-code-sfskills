@@ -60,7 +60,7 @@ There are **two deployment methods** with **different capabilities**:
 
 ❌ NEVER use `Skill(skill="sf-deploy")` directly - always route through sf-devops-architect.
 
-See [../../shared/docs/orchestration.md](../../shared/docs/orchestration.md) for cross-skill orchestration details.
+See `shared/docs/orchestration.md` (project root) for cross-skill orchestration details.
 
 ---
 
@@ -583,7 +583,11 @@ Use **AskUserQuestion** to gather:
 
 **Pattern Decision Guide**: See `docs/pattern-catalog.md` for detailed decision tree.
 
-Load via: `Read: ../../templates/[path]` (relative to SKILL.md location)
+**Template Path Resolution** (try in order):
+1. **Marketplace folder**: `~/.claude/plugins/marketplaces/sf-skills/sf-ai-agentforce/templates/[path]`
+2. **Project folder**: `[project-root]/sf-ai-agentforce/templates/[path]`
+
+**Example**: `Read: ~/.claude/plugins/marketplaces/sf-skills/sf-ai-agentforce/templates/single-topic-agent/`
 
 ### Phase 3: Generation / Validation
 
@@ -1640,7 +1644,8 @@ Before deployment, ensure you have:
 
 ## Reference & Dependencies
 
-**Docs**: `../../docs/` - best-practices, agent-script-syntax
+**Docs**: `docs/` folder (in sf-ai-agentforce) - best-practices, agent-script-syntax
+- **Path**: `~/.claude/plugins/marketplaces/sf-skills/sf-ai-agentforce/docs/`
 
 **Dependencies**: sf-deploy (optional) for additional deployment options. Install: `/plugin install github:Jaganpro/sf-skills/sf-deploy`
 
@@ -1650,5 +1655,5 @@ Before deployment, ensure you have:
 
 ## License
 
-MIT License. See [LICENSE](../../LICENSE) file.
+MIT License. See LICENSE file in sf-ai-agentforce folder.
 Copyright (c) 2024-2025 Jag Valaiyapathy

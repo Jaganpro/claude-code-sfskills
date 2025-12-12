@@ -74,7 +74,11 @@ Use **AskUserQuestion** to gather:
 | ECA OAuth Settings | `templates/eca-oauth-settings.xml` |
 | ECA Policies | `templates/eca-policies.xml` |
 
-Load via: `Read: ../../templates/[template]` (relative to SKILL.md location)
+**Template Path Resolution** (try in order):
+1. **Marketplace folder**: `~/.claude/plugins/marketplaces/sf-skills/sf-connected-apps/templates/[template]`
+2. **Project folder**: `[project-root]/sf-connected-apps/templates/[template]`
+
+**Example**: `Read: ~/.claude/plugins/marketplaces/sf-skills/sf-connected-apps/templates/connected-app-jwt.xml`
 
 **File Locations**:
 - Connected Apps: `force-app/main/default/connectedApps/`
@@ -128,7 +132,7 @@ Score: XX/120 ⭐⭐⭐⭐ Rating
 
 ### Scoring Thresholds
 
-See [../../shared/docs/scoring-overview.md](../../shared/docs/scoring-overview.md). Block deployment if score < 54.
+See `shared/docs/scoring-overview.md` (project root). Block deployment if score < 54.
 
 ### Phase 5: Deployment & Documentation
 
