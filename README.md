@@ -254,26 +254,68 @@ TaskOutput(task_id="uat-id", block=true)
 
 ### Automatic Validation Hooks
 
-Each skill includes validation hooks that run automatically when you write files:
+Each skill includes validation hooks that run automatically on **Write** and **Edit** operations:
 
 | | Skill | File Type | Validation |
 |--|-------|-----------|------------|
-| ⚡ | sf-apex | `*.cls`, `*.trigger` | Apex anti-patterns, TAF compliance |
-| 🔄 | sf-flow | `*.flow-meta.xml` | Flow best practices, bulk safety |
-| 📋 | sf-metadata | `*.object-meta.xml`, `*.field-meta.xml`, etc. | Metadata best practices, FLS checks |
+| ⚡ | sf-apex | `*.cls`, `*.trigger` | 150-pt scoring + Code Analyzer |
+| 🔄 | sf-flow | `*.flow-meta.xml` | 110-pt scoring + Flow Scanner |
+| 📋 | sf-metadata | `*.object-meta.xml`, `*.field-meta.xml` | Metadata best practices |
 | 💾 | sf-data | `*.apex`, `*.soql` | SOQL patterns, governor limits |
-| 🤖 | sf-ai-agentforce | `*.agent`, `*.genAiFunction-meta.xml` | Agent Script syntax, topic validation |
-| 🔐 | sf-connected-apps | `*.connectedApp-meta.xml`, `*.eca-meta.xml` | OAuth security, PKCE validation |
-| 🔗 | sf-integration | `*.namedCredential-meta.xml`, `*.cls` | Named Credential security, callout patterns |
-| 🛠️ | skill-builder | `SKILL.md` | YAML frontmatter validation |
+| 🤖 | sf-ai-agentforce | `*.agent`, `*.genAiFunction-meta.xml` | Agent Script syntax |
+| 🔐 | sf-connected-apps | `*.connectedApp-meta.xml` | OAuth security |
+| 🔗 | sf-integration | `*.namedCredential-meta.xml` | Callout patterns |
+| 🛠️ | skill-builder | `SKILL.md` | YAML frontmatter |
 
-Hooks provide **advisory feedback** after writes - they inform but don't block.
+#### 🔬 Code Analyzer V5 Integration
+
+Hooks integrate [Salesforce Code Analyzer V5](https://developer.salesforce.com/docs/platform/salesforce-code-analyzer) for OOTB linting alongside custom scoring:
+
+| Engine | What It Checks | Dependency |
+|--------|----------------|------------|
+| **PMD** | 80+ Apex rules (CRUD violations, empty catch blocks, complexity) | Java 11+ |
+| **SFGE** | Data flow analysis, path-based security | Java 11+ |
+| **Regex** | Trailing whitespace, hardcoded patterns | None |
+| **ESLint** | JavaScript/LWC linting | Node.js |
+| **Flow Scanner** | Flow best practices | Python 3.10+ |
+
+**Graceful Degradation:** If dependencies are missing, hooks run custom validation only and show which engines were skipped.
+
+**Sample Output:**
+```
+🔍 Apex Validation: AccountService.cls
+════════════════════════════════════════════════════════════════════════════════
+📊 Score: 138/150 ⭐⭐⭐⭐ Very Good
+   (Custom: 145, CA deductions: -7)
+
+📋 Category Breakdown:
+   ✅ Security: 25/25
+   ✅ Bulkification: 25/25
+   ⚠️ Testing: 20/25 (-5)
+   ✅ Architecture: 20/20
+
+🔬 Code Analyzer: pmd, regex (2847ms)
+
+❗ Issues Found (3):
+   🟠 HIGH [CA:pmd] L30: Validate CRUD permission before DML
+   🟠 HIGH [CA:pmd] L45: Avoid empty catch blocks
+   🔵 INFO [CA:regex] L12: Trailing whitespace
+════════════════════════════════════════════════════════════════════════════════
+```
+
+Hooks provide **advisory feedback** — they inform but don't block operations.
 
 ## 🔧 Prerequisites
 
+**Required:**
 - **Claude Code** (latest version)
-- **Salesforce CLI** v2.x (`sf` command, not legacy `sfdx`)
-- **Python 3.8+** (optional, for validation hooks)
+- **Salesforce CLI** v2.x (`sf` command)
+- **Python 3.10+** (for validation hooks)
+
+**Optional** (enables additional Code Analyzer engines):
+- **Java 11+** — Enables PMD, CPD, SFGE engines (`brew install openjdk@11`)
+- **Node.js** — Enables ESLint, RetireJS for LWC (`brew install node`)
+- **Code Analyzer plugin** — `sf plugins install @salesforce/sfdx-code-analyzer`
 
 ## Usage Examples
 
