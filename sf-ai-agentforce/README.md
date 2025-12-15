@@ -64,7 +64,7 @@ sf agent preview --api-name My_Agent --target-org dev
 
 | Category | Points | Focus |
 |----------|--------|-------|
-| Structure & Syntax | 20 | Valid syntax, 4-space indentation |
+| Structure & Syntax | 20 | Valid syntax, consistent indentation (tabs recommended) |
 | Topic Design | 20 | Clear descriptions, proper transitions |
 | Action Integration | 20 | Valid targets, input/output mapping |
 | Variable Management | 15 | Typed variables, meaningful names |
@@ -123,7 +123,7 @@ topic help:
 
 | Rule | Details |
 |------|---------|
-| Indentation | **4 spaces** (not tabs, not 3 spaces) |
+| Indentation | **Tabs recommended** (or consistent spaces - never mix) |
 | Variables | `@variables.name` (plural!) |
 | Booleans | `True` / `False` (capitalized) |
 | Templates | `{!@variables.name}` in instructions |

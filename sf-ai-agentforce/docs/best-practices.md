@@ -379,4 +379,4 @@ Before deploying an agent, verify:
 - [ ] Navigation back to main menu from all topics
 - [ ] No internal details exposed in messages
 - [ ] Template expressions use correct syntax `{!@variables.name}`
-- [ ] Consistent indentation throughout (2, 3, or 4 spaces - don't mix)
+- [ ] Consistent indentation throughout (tabs recommended - never mix tabs and spaces)

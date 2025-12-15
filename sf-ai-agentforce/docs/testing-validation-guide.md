@@ -472,7 +472,7 @@ Before running `sf agent publish authoring-bundle`:
 - [ ] Both in `force-app/main/default/aiAuthoringBundles/[AgentName]/`
 
 ### Syntax
-- [ ] 4-space indentation (not tabs, not 3 spaces)
+- [ ] TAB indentation recommended (or consistent spaces - never mix tabs and spaces)
 - [ ] `developer_name` in config (not `agent_name`)
 - [ ] `default_agent_user` set to valid org user
 - [ ] `system.instructions` is single quoted string

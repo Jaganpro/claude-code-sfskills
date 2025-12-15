@@ -171,5 +171,5 @@ Score: 100/100 ⭐⭐⭐⭐⭐ Excellent
 | "Agent not found" | Ensure sfdx-project.json exists in project root |
 | "NEW AGENT USER not found" | Update `default_agent_user` to a valid org user |
 | "Internal Error" | Try a different user or check org permissions |
-| Syntax errors | Verify 4-space indentation and `instructions: ->` syntax |
+| Syntax errors | Verify TAB indentation (consistent) and `instructions: ->` syntax |
 | Missing commands | Run `sf plugins install @salesforce/plugin-agent@latest` |

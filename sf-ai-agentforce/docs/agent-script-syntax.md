@@ -160,26 +160,23 @@ topic farewell:
 
 | Rule | Details |
 |------|---------|
-| **Spaces** | 2, 3, or 4 spaces all work |
-| **Tabs** | Tabs work if used consistently |
+| **Tabs (Recommended)** | ✅ Use tabs for easier manual editing and consistent alignment |
+| **Spaces** | 2, 3, or 4 spaces also work if used consistently |
 | **Mixing** | ❌ NEVER mix tabs and spaces (causes parse errors) |
 | **Consistency** | All lines at same nesting level must use same indentation |
 
+**⚠️ RECOMMENDED: Use TAB indentation for all Agent Script files.** Tabs are easier to edit manually and provide consistent visual alignment across editors.
+
 ```agentscript
-# ✅ CORRECT - consistent 3 spaces (recommended for readability)
+# ✅ RECOMMENDED - consistent tabs (best for manual editing)
+config:
+	agent_name: "My_Agent"
+	description: "Description"
+
+# ✅ ALSO CORRECT - consistent spaces (if you prefer)
 config:
    agent_name: "My_Agent"
    description: "Description"
-
-# ✅ ALSO CORRECT - consistent 2 spaces
-config:
-  agent_name: "My_Agent"
-  description: "Description"
-
-# ✅ ALSO CORRECT - consistent 4 spaces
-config:
-    agent_name: "My_Agent"
-    description: "Description"
 
 # ❌ WRONG - mixing tabs and spaces
 config:
@@ -1027,7 +1024,7 @@ instructions: ->
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| Parse error | Invalid syntax | Check 3-space indentation |
+| Parse error | Invalid syntax | Check indentation consistency (use tabs) |
 | Unknown resource | Invalid `@` reference | Use `@variables`, `@actions`, etc. |
 | Undefined variable | Variable not declared | Add to `variables:` block |
 | Undefined topic | Topic not found | Add topic or fix reference |
@@ -1047,8 +1044,8 @@ instructions: ->
 
 | Anti-Pattern | Issue | Fix |
 |--------------|-------|-----|
-| Tab indentation | Syntax error | Use 3 spaces |
-| 4-space indentation | Syntax may fail | Use 3 spaces per level |
+| Mixed tabs/spaces | Syntax error | Use tabs consistently (recommended) or spaces consistently |
+| Inconsistent indentation | Syntax may fail | Ensure same indentation at same nesting level |
 | `@variable.name` | Wrong syntax | Use `@variables.name` (plural) |
 | `developer_name:` | Wrong field | Use `agent_name:` |
 | `instructions:->` | Missing space | Use `instructions: ->` |
