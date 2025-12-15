@@ -742,25 +742,35 @@ sf agent publish authoring-bundle --api-name [AgentName] --target-org [alias]
 | **Create NEW agent** | `sf agent publish authoring-bundle` | Required to create BotDefinition |
 | **Update EXISTING agent** | `sf project deploy start` | More reliable, avoids HTTP 404 |
 
-**HTTP 404 Error is BENIGN for NEW Agents**:
+**HTTP 404 Error is BENIGN for BotDefinition, but BLOCKS UI Visibility**:
 - The `sf agent publish authoring-bundle` command may fail with `ERROR_HTTP_404` during "Retrieve Metadata" step
-- However, if "Publish Agent" step completed (✔), the agent WAS created successfully
-- The error occurs during metadata retrieval, not during agent creation
-- After HTTP 404 error: verify with `sf data query` to confirm agent exists, then activate
+- If "Publish Agent" step completed (✔), the **BotDefinition WAS created** successfully
+- However, the **AiAuthoringBundle metadata is NOT deployed** to the org
+- This means **agents will be INVISIBLE in Agentforce Studio UI** even though they exist!
+- **FIX**: After HTTP 404 error, run `sf project deploy start` to deploy the AiAuthoringBundle metadata:
+  ```bash
+  sf project deploy start --source-dir force-app/main/default/aiAuthoringBundles/[AgentName] --target-org [alias]
+  ```
+- Verify deployment: `sf org list metadata --metadata-type AiAuthoringBundle --target-org [alias]`
 
-**Workflow for NEW Agents** (despite HTTP 404 error):
+**Workflow for NEW Agents** (with HTTP 404 fix):
 ```bash
 # 1. Deploy dependencies first (flows, apex)
 sf project deploy start --source-dir force-app/main/default/flows --target-org [alias]
 sf project deploy start --source-dir force-app/main/default/classes --target-org [alias]
 
-# 2. Publish agent (may show HTTP 404 but agent is still created)
+# 2. Publish agent (may show HTTP 404 but BotDefinition is still created)
 sf agent publish authoring-bundle --api-name [AgentName] --target-org [alias]
 
-# 3. Verify agent was created
-sf data query --query "SELECT Id, DeveloperName FROM BotDefinition WHERE DeveloperName = '[AgentName]'" --target-org [alias]
+# 3. ⚠️ CRITICAL: Deploy AiAuthoringBundle metadata (required for UI visibility!)
+# This step is REQUIRED if you got HTTP 404 error above
+sf project deploy start --source-dir force-app/main/default/aiAuthoringBundles/[AgentName] --target-org [alias]
 
-# 4. Activate (required to make visible in UI)
+# 4. Verify agent was created AND metadata deployed
+sf data query --query "SELECT Id, DeveloperName FROM BotDefinition WHERE DeveloperName = '[AgentName]'" --target-org [alias]
+sf org list metadata --metadata-type AiAuthoringBundle --target-org [alias]
+
+# 5. Activate (required to enable agent)
 sf agent activate --api-name [AgentName] --target-org [alias]
 ```
 
@@ -2192,6 +2202,7 @@ python3 ~/.claude/plugins/marketplaces/sf-skills/sf-agentforce/hooks/scripts/val
 | Boolean capitalization | `true/false` invalid | Use `True/False` |
 | **⚠️ Validation Required** | **Skipping validation causes late-stage failures** | **ALWAYS run `sf agent validate authoring-bundle` BEFORE deploy** |
 | Deploy Command | `sf agent publish` may fail with HTTP 404 | Use `sf project deploy start --source-dir` as reliable alternative |
+| **HTTP 404 UI Visibility** | **HTTP 404 creates Bot but NOT AiAuthoringBundle** | **Run `sf project deploy start` after HTTP 404 to deploy metadata** |
 | **System Instructions** | Pipe `\|` syntax fails in system: block | Use single quoted string only |
 | **Escalate Description** | Inline description fails | Put `description:` on separate indented line |
 | **Agent User** | Invalid user causes "Internal Error" | Use valid org user with proper permissions |

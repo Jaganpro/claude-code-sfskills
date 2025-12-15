@@ -951,6 +951,22 @@ This command:
 - Deploys the AiAuthoringBundle
 - **Agent appears in Agentforce Studio** ✅
 
+**⚠️ HTTP 404 Error Issue (Tested Dec 2025)**:
+
+The `sf agent publish authoring-bundle` command may fail with `ERROR_HTTP_404` during "Retrieve Metadata" step:
+- If "Publish Agent" step completed (✔), the **BotDefinition WAS created** successfully
+- However, the **AiAuthoringBundle metadata is NOT deployed** to the org
+- This means **agents will be INVISIBLE in Agentforce Studio UI** even though they exist!
+
+**FIX**: After HTTP 404 error, run `sf project deploy start` to deploy the metadata:
+```bash
+# Deploy the AiAuthoringBundle metadata to make agent visible in UI
+sf project deploy start --source-dir force-app/main/default/aiAuthoringBundles/[AgentName] --target-org [alias]
+
+# Verify the metadata was deployed
+sf org list metadata --metadata-type AiAuthoringBundle --target-org [alias]
+```
+
 **Other commands**:
 ```bash
 # Validate without publishing
@@ -1083,6 +1099,7 @@ instructions: ->
 | Wrong config field | Using `developer_name` | Use `agent_name` |
 | Missing space | `instructions:->` | Use `instructions: ->` |
 | **Internal Error, try again later** | **Flow variable names don't match** | **Ensure Agent Script input/output names EXACTLY match Flow variable API names** |
+| **ERROR_HTTP_404 during Retrieve Metadata** | **AiAuthoringBundle metadata not deployed** | **Run `sf project deploy start` after publish to deploy metadata** |
 | SyntaxError: Unexpected 'with' | Escalate with reason in AiAuthoringBundle | Use basic `@utils.escalate` or GenAiPlannerBundle |
 | SyntaxError: Unexpected 'escalate' | Invalid escalation syntax in AiAuthoringBundle | Use GenAiPlannerBundle for `with reason=` syntax |
 | SyntaxError: Unexpected 'run' | `run` keyword in AiAuthoringBundle | Use GenAiPlannerBundle for action callbacks |
@@ -1107,3 +1124,4 @@ instructions: ->
 | `@utils.escalate with reason=` in AiAuthoringBundle | SyntaxError | Use basic escalation or GenAiPlannerBundle |
 | `run` keyword in AiAuthoringBundle | SyntaxError | Use GenAiPlannerBundle for action callbacks |
 | Expecting UI visibility with GenAiPlannerBundle | Agent not visible | Use AiAuthoringBundle for UI visibility |
+| **Ignoring HTTP 404 after publish** | **Agent invisible in UI** | **Run `sf project deploy start` to deploy AiAuthoringBundle metadata** |
