@@ -59,10 +59,60 @@ sf-apex/
 | **Codex CLI** | ✅ Installer | `.codex/skills/` | ![OpenAI](https://img.shields.io/badge/OpenAI-Codex-412991?logo=openai&logoColor=white) |
 | **Gemini CLI** | ✅ Installer | `~/.gemini/skills/` | ![Google](https://img.shields.io/badge/Google-Gemini_CLI-4285F4?logo=google&logoColor=white) |
 | **Amp CLI** | ✅ Compatible | `.claude/skills/` | ![Amp](https://img.shields.io/badge/Sourcegraph-Amp-FF5543?logo=sourcegraph&logoColor=white) |
-| **Droid CLI** | 🔧 Setup Required | — | ![Droid](https://img.shields.io/badge/Android-Droid-3DDC84?logo=android&logoColor=white) |
-| **Cursor CLI** | 🔜 Planned | — | ![Cursor](https://img.shields.io/badge/Cursor-Agent_CLI-000000?logo=cursor&logoColor=white) |
+| **Droid CLI** | ✅ Compatible | `.factory/skills/` | ![Factory](https://img.shields.io/badge/Factory.ai-Droid-6366F1?logo=robot&logoColor=white) |
+| **Cursor CLI** | 🔗 Via Bridge | `.cursor/rules/` | ![Cursor](https://img.shields.io/badge/Cursor-Agent_CLI-000000?logo=cursor&logoColor=white) |
+| **Agentforce Vibes** | ⏳ Pending Cline | `.clinerules/` | ![Salesforce](https://img.shields.io/badge/Salesforce-Vibes-00A1E0?logo=salesforce&logoColor=white) |
 
 > **Agent Skills Open Standard:** These skills follow the [Agent Skills specification](https://agentskills.io) for cross-CLI compatibility.
+
+### CLI Compatibility Notes
+
+<details>
+<summary><b>Droid CLI</b> (Factory.ai) — Claude Code Compatible</summary>
+
+Droid CLI (v0.26.0+) natively supports Claude Code skills format. Skills can be imported directly:
+
+```bash
+# Droid auto-discovers skills from .claude/skills/ directory
+# Or use the /skills command within Droid to manage skills
+```
+
+- **Install Path:** `.factory/skills/` or `~/.factory/skills/`
+- **Format:** Claude Code compatible (SKILL.md + scripts/)
+- **Docs:** [docs.factory.ai/cli/configuration/skills](https://docs.factory.ai/cli/configuration/skills)
+
+</details>
+
+<details>
+<summary><b>Cursor CLI</b> — Via SkillPort Bridge</summary>
+
+Cursor uses its own rules system (`.cursor/rules/` with MDC format). Agent Skills require the [SkillPort](https://github.com/gotalab/skillport) bridge:
+
+```bash
+# Install SkillPort MCP server for Cursor
+# Skills are then accessible via MCP integration
+```
+
+- **Native Format:** `.cursor/rules/*.mdc` (Markdown with metadata)
+- **Skills Bridge:** SkillPort MCP server
+- **Docs:** [docs.cursor.com/context/rules-for-ai](https://docs.cursor.com/context/rules-for-ai)
+
+</details>
+
+<details>
+<summary><b>Agentforce Vibes</b> (Salesforce) — Pending Cline Support</summary>
+
+Agentforce Vibes is built on [Cline](https://cline.bot) as its foundation. Currently uses `.clinerules` for custom instructions and MCP for extensibility.
+
+**Skills will be ported once Cline adds native Agent Skills support.** Cline's current extensibility is via:
+- `.clinerules/` — Project-specific instructions (markdown files)
+- MCP Marketplace — Plugin system for tools
+
+- **Current Format:** `.clinerules/*.md` + MCP servers
+- **Skills Status:** Not yet supported natively
+- **Tracking:** Monitor [Cline GitHub](https://github.com/cline/cline) for Agent Skills RFC
+
+</details>
 
 ## ✨ Available Skills
 
