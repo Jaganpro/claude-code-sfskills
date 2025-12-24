@@ -65,7 +65,7 @@ def query_record_count(sobject: str, target_org: str) -> int:
 
 
 def query_object_describe(sobject: str, target_org: str) -> dict:
-    """Get object metadata including OWD."""
+    """Get object metadata (label, custom flag) via sobject describe."""
     cmd = [
         "sf", "sobject", "describe",
         "--sobject", sobject,
@@ -77,12 +77,45 @@ def query_object_describe(sobject: str, target_org: str) -> dict:
     if data:
         result_data = data.get("result", {})
         return {
-            "sharing_model": result_data.get("sharingModel", "Unknown"),
             "is_custom": result_data.get("custom", False),
             "key_prefix": result_data.get("keyPrefix", ""),
             "label": result_data.get("label", sobject),
         }
     return {}
+
+
+def query_owd_bulk(objects: list[str], target_org: str) -> dict[str, dict]:
+    """
+    Query OWD for multiple objects using Tooling API EntityDefinition.
+
+    This is the correct way to get OWD - sf sobject describe returns null
+    for sharingModel, but EntityDefinition via Tooling API works.
+    """
+    # Build IN clause for SOQL
+    quoted_objects = ", ".join([f"'{obj}'" for obj in objects])
+    query = f"SELECT QualifiedApiName, InternalSharingModel, ExternalSharingModel FROM EntityDefinition WHERE QualifiedApiName IN ({quoted_objects})"
+
+    cmd = [
+        "sf", "data", "query",
+        "--query", query,
+        "--target-org", target_org,
+        "--use-tooling-api",
+        "--json"
+    ]
+
+    data = run_sf_command(cmd, timeout=60)
+    result = {}
+
+    if data:
+        records = data.get("result", {}).get("records", [])
+        for record in records:
+            api_name = record.get("QualifiedApiName", "")
+            result[api_name] = {
+                "internal_owd": record.get("InternalSharingModel", "Unknown"),
+                "external_owd": record.get("ExternalSharingModel", "Unknown"),
+            }
+
+    return result
 
 
 def get_object_type(sobject: str, describe: dict) -> str:
@@ -215,6 +248,13 @@ Examples:
         print(f"\nQuerying {len(objects)} objects from org: {args.target_org}")
         print("-" * 50)
 
+    # Bulk query OWD for all objects at once (much faster)
+    if args.output == "table":
+        print("  [0] Querying OWD via Tooling API...", end=" ", flush=True)
+    owd_data = query_owd_bulk(objects, args.target_org)
+    if args.output == "table":
+        print(f"OK ({len(owd_data)} found)")
+
     for i, obj in enumerate(objects, 1):
         if args.output == "table":
             print(f"  [{i}/{len(objects)}] Querying {obj}...", end=" ", flush=True)
@@ -223,11 +263,16 @@ Examples:
         describe = query_object_describe(obj, args.target_org)
         obj_type = get_object_type(obj, describe)
 
+        # Get OWD from bulk query result
+        obj_owd = owd_data.get(obj, {})
+        internal_owd = obj_owd.get("internal_owd", "Unknown")
+
         results[obj] = {
             "record_count": count,
             "ldv_indicator": format_ldv(count),
             "object_type": obj_type,
-            "owd": format_owd(describe.get("sharing_model", "Unknown")),
+            "owd": format_owd(internal_owd),
+            "external_owd": format_owd(obj_owd.get("external_owd", "Unknown")),
             "label": describe.get("label", obj),
         }
 
