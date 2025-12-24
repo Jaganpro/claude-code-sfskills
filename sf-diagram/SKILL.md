@@ -28,7 +28,7 @@ Expert diagram creator specializing in Salesforce architecture visualization. Ge
 | Type | Mermaid Syntax | Use Case |
 |------|---------------|----------|
 | OAuth Flows | `sequenceDiagram` | Authorization Code, JWT Bearer, PKCE, Device Flow |
-| Data Models | `erDiagram` | Object relationships, field definitions |
+| Data Models | `flowchart LR` | Object relationships with color coding (preferred) |
 | Integration Sequences | `sequenceDiagram` | API callouts, event-driven flows |
 | System Landscapes | `flowchart` | High-level architecture, component diagrams |
 | Role Hierarchies | `flowchart` | User hierarchies, profile/permission structures |
@@ -83,14 +83,14 @@ Read: ~/.claude/plugins/marketplaces/sf-skills/sf-diagram/templates/oauth/jwt-be
 - Apply CloudSundial-inspired styling
 - Include all protocol steps with numbered sequence
 
-**For ERD Diagrams**:
-1. If org connected, invoke sf-metadata:
+**For ERD/Data Model Diagrams**:
+1. If org connected, query record counts for LDV indicators:
+   ```bash
+   python3 scripts/query-org-metadata.py --objects Account,Contact --target-org myorg
    ```
-   Skill(skill="sf-metadata")
-   Request: "Describe objects: Account, Contact, Opportunity"
-   ```
-2. Extract fields, relationships, and cardinality
-3. Map to Mermaid erDiagram syntax
+2. Identify relationships (Lookup vs Master-Detail)
+3. Determine object types (Standard, Custom, External)
+4. Generate `flowchart LR` with color coding (preferred format)
 
 **For Integration Diagrams**:
 - Identify all systems involved
@@ -103,7 +103,8 @@ Read: ~/.claude/plugins/marketplaces/sf-skills/sf-diagram/templates/oauth/jwt-be
 1. Apply color scheme from `docs/color-palette.md`
 2. Add annotations and notes where helpful
 3. Include autonumber for sequence diagrams
-4. Use proper cardinality notation for ERDs
+4. For data models: Use `flowchart LR` with object-type color coding
+5. Keep ERD objects simple - show object name and record count only (no fields)
 
 **Generate ASCII fallback**:
 1. Use box-drawing characters: `┌ ─ ┐ │ └ ┘ ├ ┤ ┬ ┴ ┼`
@@ -190,34 +191,28 @@ Templates in `templates/oauth/`.
 
 ---
 
-## ERD Notation Reference
+## Data Model Notation Reference
 
-### Cardinality Symbols (Crow's Foot)
+### Preferred Format: `flowchart LR`
+
+Use `flowchart LR` (left-to-right) for data model diagrams. This format supports:
+- Individual node color coding by object type
+- Thick arrows (`==>`) for Master-Detail relationships
+- Left-to-right flow for readability
+
+### Relationship Arrows
 ```
-||--||  One-to-One
-||--o{  One-to-Many
-}o--||  Many-to-One
-}o--o{  Many-to-Many
+-->   Lookup (LK) - optional parent, no cascade delete
+==>   Master-Detail (MD) - required parent, cascade delete
+-.->  Conversion/special relationship (e.g., Lead converts)
 ```
 
-### Field Annotations
+### Object Node Format
 ```
-PK  Primary Key (Id)
-FK  Foreign Key (Lookup/MasterDetail)
-UK  Unique Key (External Id)
+ObjectName["ObjectName<br/>(record count)"]
 ```
 
-### Salesforce Field Type Mapping
-| SF Type | ERD Type | Notes |
-|---------|----------|-------|
-| Id | Id | 18-character Salesforce ID |
-| Text | Text/String | Text fields, Names |
-| Number | Number/Decimal | Currency, Percent, Number |
-| Checkbox | Boolean | True/False |
-| Date/DateTime | Date/DateTime | Date fields |
-| Lookup | FK | Foreign key reference |
-| MasterDetail | FK | Foreign key with cascade delete |
-| Picklist | Picklist/Enum | Restricted values |
+Example: `Account["Account<br/>(317)"]`
 
 ---
 
@@ -287,11 +282,13 @@ See `docs/erd-conventions.md` for complete documentation of:
 - Group related actors with `box` blocks
 - Add `Note over` for protocol details (tokens, codes)
 
-### ERD Diagrams
-- Include all PK and FK annotations
-- Show required fields with "(Required)" note
-- Group related objects visually
-- Use consistent naming (API names, not labels)
+### Data Model Diagrams
+- Use `flowchart LR` format (left-to-right flow)
+- Keep objects simple: name + record count only (no fields)
+- Color code by object type: Blue=Standard, Orange=Custom, Green=External
+- Use `-->` for Lookup, `==>` for Master-Detail relationships
+- Add LDV indicator for objects >2M records
+- Use API names, not labels (e.g., `Account` not "Accounts")
 
 ### Integration Diagrams
 - Show error paths with `alt`/`else` blocks
@@ -340,9 +337,12 @@ You should:
 User: "Create an ERD for Account, Contact, Opportunity, and Case"
 
 You should:
-1. If org connected: Query sf-metadata for field details
-2. Load templates/datamodel/salesforce-erd.md
-3. Generate Mermaid erDiagram with relationships
+1. If org connected: Query record counts via query-org-metadata.py
+2. Load templates/datamodel/salesforce-erd.md (or cloud-specific template)
+3. Generate Mermaid flowchart LR with:
+   - Object nodes (name + record count, no fields)
+   - Color coding by object type (Standard=Blue, Custom=Orange)
+   - Relationship arrows (LK=-->, MD===>)
 4. Generate ASCII fallback
 5. Score and deliver
 ```

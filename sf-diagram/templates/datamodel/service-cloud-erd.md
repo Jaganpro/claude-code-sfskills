@@ -1,6 +1,6 @@
-# Service Cloud ERD Template
+# Service Cloud Data Model Template
 
-Pre-built data model for Salesforce Service Cloud with case management, entitlements, knowledge, and service contracts.
+Pre-built data model for Salesforce Service Cloud using `flowchart LR` format with color coding and relationship indicators.
 
 ## Objects Included
 
@@ -9,16 +9,12 @@ Pre-built data model for Salesforce Service Cloud with case management, entitlem
 | Account | STD | Customer accounts |
 | Contact | STD | Customer contacts |
 | Case | STD | Support cases/tickets |
-| CaseComment | STD | Internal/public case comments |
-| CaseHistory | STD | Case field change tracking |
+| CaseComment | STD | Case comments |
 | Entitlement | STD | Support entitlements |
 | ServiceContract | STD | Service agreements |
 | ContractLineItem | STD | Contract products |
-| SlaProcess | STD | Entitlement process |
-| KnowledgeArticleVersion | STD | Knowledge base articles |
-| CaseArticle | STD | Case-article junction |
-| Group (Queue) | STD | Case queues |
-| User | STD | Support agents |
+| Asset | STD | Customer installed products |
+| KnowledgeArticle | STD | Knowledge base articles |
 
 ---
 
@@ -28,320 +24,59 @@ Enrich diagram with live org data:
 
 ```bash
 python3 ~/.claude/plugins/marketplaces/sf-skills/sf-diagram/scripts/query-org-metadata.py \
-    --objects Account,Contact,Case,CaseComment,Entitlement,ServiceContract \
-    --target-org myorg \
-    --output table \
-    --mermaid
+    --objects Account,Contact,Case,Entitlement,ServiceContract,Asset \
+    --target-org myorg
 ```
 
 ---
 
-## Mermaid erDiagram (Standard Format)
+## Mermaid Template (Preferred)
+
+Left-to-right flowchart with color coding.
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {
-  'primaryColor': '#bae6fd',
-  'primaryTextColor': '#1f2937',
-  'primaryBorderColor': '#0369a1',
-  'lineColor': '#334155'
-}}}%%
-erDiagram
-    %% ════════════════════════════════════════════════════════════════════════════
+%%{init: {"flowchart": {"nodeSpacing": 50, "rankSpacing": 80}} }%%
+flowchart LR
+    %% ═══════════════════════════════════════════════════════════════
     %% SERVICE CLOUD DATA MODEL
-    %%
-    %% LEGEND - Relationship Types:
-    %%   LK = Lookup (optional parent, no cascade delete)
-    %%   MD = Master-Detail (required parent, cascade delete)
-    %% ════════════════════════════════════════════════════════════════════════════
+    %% LEGEND: LK = Lookup (-->), MD = Master-Detail (==>)
+    %% Colors: Blue = Standard, Orange = Custom, Green = External
+    %% ═══════════════════════════════════════════════════════════════
 
-    %% ─────────────────────────────────────────────────────────────────────────────
-    %% CASE MANAGEMENT
-    %% ─────────────────────────────────────────────────────────────────────────────
+    %% Customer Objects
+    Account["Account<br/>(count)"]
+    Contact["Contact<br/>(count)"]
+    Asset["Asset<br/>(count)"]
 
-    Account ||--o{ Case : "LK - has cases"
-    Contact ||--o{ Case : "LK - reports"
-    Case ||--o{ Case : "LK - parent of"
-    Case ||--o{ CaseComment : "MD - has comments"
-    Entitlement ||--o{ Case : "LK - covers"
+    %% Case Management
+    Case["Case<br/>(count)"]
+    CaseComment["CaseComment<br/>(count)"]
 
-    Account {
-        Id Id PK "[STD] {{LDV}}"
-        Text Name "Required"
-        Lookup OwnerId FK "User"
-        Phone Phone
-        Text BillingCity
-        Text __metadata__ "{{OWD}}"
-    }
+    %% Entitlement Objects
+    Entitlement["Entitlement<br/>(count)"]
+    ServiceContract["ServiceContract<br/>(count)"]
+    CLI["ContractLineItem<br/>(count)"]
 
-    Contact {
-        Id Id PK "[STD]"
-        Lookup AccountId FK "Account"
-        Text LastName "Required"
-        Email Email
-        Phone Phone
-        Text __metadata__ "{{OWD}}"
-    }
+    %% Knowledge
+    Knowledge["KnowledgeArticle<br/>(count)"]
 
-    Case {
-        Id Id PK "[STD] {{LDV}}"
-        Text CaseNumber "Auto-Number"
-        Lookup AccountId FK "Account"
-        Lookup ContactId FK "Contact"
-        Lookup OwnerId FK "User, Queue"
-        Lookup ParentId FK "Case (Self)"
-        Lookup EntitlementId FK "Entitlement"
-        Lookup AssetId FK "Asset"
-        Text Subject
-        TextArea Description
-        Picklist Status "Required"
-        Picklist Priority
-        Picklist Origin "Required"
-        Picklist Type
-        Picklist Reason
-        Checkbox IsClosed
-        Checkbox IsEscalated
-        DateTime ClosedDate
-        Text __metadata__ "{{OWD}}"
-    }
-
-    CaseComment {
-        Id Id PK "[STD]"
-        MasterDetail ParentId FK "Case"
-        TextArea CommentBody
-        Checkbox IsPublished
-        Lookup CreatedById FK "User"
-        DateTime CreatedDate
-    }
-
-    %% ─────────────────────────────────────────────────────────────────────────────
-    %% ENTITLEMENT MANAGEMENT
-    %% ─────────────────────────────────────────────────────────────────────────────
-
-    Account ||--o{ Entitlement : "LK - entitled to"
-    ServiceContract ||--o{ Entitlement : "LK - includes"
-    ServiceContract ||--o{ ContractLineItem : "MD - contains"
-    Account ||--o{ ServiceContract : "LK - has contracts"
-    SlaProcess ||--o{ Entitlement : "LK - governs"
-
-    Entitlement {
-        Id Id PK "[STD]"
-        Text Name "Required"
-        Lookup AccountId FK "Account"
-        Lookup ServiceContractId FK "ServiceContract"
-        Lookup SlaProcessId FK "SlaProcess"
-        Lookup AssetId FK "Asset"
-        Date StartDate
-        Date EndDate
-        Picklist Type
-        Number RemainingCases
-        Number RemainingWorkOrders
-        Checkbox IsPerIncident
-    }
-
-    ServiceContract {
-        Id Id PK "[STD]"
-        Text Name "Required"
-        Text ContractNumber "Auto-Number"
-        Lookup AccountId FK "Account"
-        Lookup ContactId FK "Contact"
-        Date StartDate
-        Date EndDate
-        Date ActivationDate
-        Picklist Status
-        Picklist ApprovalStatus
-        Currency Discount
-        Currency GrandTotal
-    }
-
-    ContractLineItem {
-        Id Id PK "[STD]"
-        MasterDetail ServiceContractId FK "ServiceContract"
-        Lookup Product2Id FK "Product2"
-        Lookup PricebookEntryId FK "PricebookEntry"
-        Lookup AssetId FK "Asset"
-        Text LineItemNumber "Required"
-        Number Quantity
-        Currency UnitPrice
-        Currency TotalPrice
-        Date StartDate
-        Date EndDate
-    }
-
-    SlaProcess {
-        Id Id PK "[STD]"
-        Text Name "Required"
-        Picklist SobjectType "Case/WorkOrder"
-        Checkbox IsActive
-        Text Description
-    }
-
-    %% ─────────────────────────────────────────────────────────────────────────────
-    %% KNOWLEDGE MANAGEMENT
-    %% ─────────────────────────────────────────────────────────────────────────────
-
-    KnowledgeArticleVersion ||--o{ CaseArticle : "via junction"
-    Case ||--o{ CaseArticle : "via junction"
-
-    KnowledgeArticleVersion {
-        Id Id PK "[STD]"
-        Text Title "Required"
-        TextArea Summary
-        Text ArticleNumber
-        Text UrlName "URL-friendly name"
-        Picklist PublishStatus "Draft/Published/Archived"
-        Picklist Language
-        Number VersionNumber
-        DateTime FirstPublishedDate
-        DateTime LastPublishedDate
-        Checkbox IsLatestVersion
-        Checkbox IsVisibleInApp
-        Checkbox IsVisibleInPkb
-        Checkbox IsVisibleInCsp
-    }
-
-    CaseArticle {
-        Id Id PK "[STD]"
-        Lookup CaseId FK "Case"
-        Lookup KnowledgeArticleVersionId FK "KnowledgeArticleVersion"
-        DateTime ArticleCreatedDate
-    }
-
-    %% ─────────────────────────────────────────────────────────────────────────────
-    %% ASSETS (Customer Installed Products)
-    %% ─────────────────────────────────────────────────────────────────────────────
-
-    Account ||--o{ Asset : "LK - owns"
-    Contact ||--o{ Asset : "LK - uses"
-    Asset ||--o{ Case : "LK - related to"
-
-    Asset {
-        Id Id PK "[STD]"
-        Text Name "Required"
-        Lookup AccountId FK "Account"
-        Lookup ContactId FK "Contact"
-        Lookup Product2Id FK "Product2"
-        Lookup ParentId FK "Asset (Self)"
-        Text SerialNumber
-        Date InstallDate
-        Date PurchaseDate
-        Date UsageEndDate
-        Picklist Status
-        Currency Price
-        Number Quantity
-    }
-
-    %% ─────────────────────────────────────────────────────────────────────────────
-    %% QUEUE & USER ASSIGNMENT
-    %% ─────────────────────────────────────────────────────────────────────────────
-
-    User ||--o{ Case : "LK - owns/assigned"
-    Group ||--o{ Case : "LK - queue assignment"
-
-    User {
-        Id Id PK "[STD]"
-        Text Username "Required, Unique"
-        Text LastName "Required"
-        Email Email "Required"
-        Checkbox IsActive
-        Lookup ProfileId FK "Profile"
-    }
-
-    Group {
-        Id Id PK "[STD]"
-        Text Name "Required"
-        Picklist Type "Queue"
-        Email Email "Queue email"
-        Checkbox DoesIncludeBosses
-    }
-```
-
----
-
-## Mermaid Flowchart (With Color Coding)
-
-```mermaid
-%%{init: {"flowchart": {"nodeSpacing": 60, "rankSpacing": 50}} }%%
-flowchart TB
-    %% ════════════════════════════════════════════════════════════════════════════
-    %% SERVICE CLOUD DATA MODEL - FLOWCHART VIEW
-    %% ════════════════════════════════════════════════════════════════════════════
-
-    subgraph legend["LEGEND"]
-        direction LR
-        L_STD["Standard [STD]"]
-        L_CUST["Custom [CUST]"]
-        L_LK["─── LK (Lookup)"]
-        L_MD["═══ MD (Master-Detail)"]
-
-        style L_STD fill:#bae6fd,stroke:#0369a1,color:#1f2937
-        style L_CUST fill:#fed7aa,stroke:#c2410c,color:#1f2937
-        style L_LK fill:#f8fafc,stroke:#334155,color:#1f2937
-        style L_MD fill:#f8fafc,stroke:#334155,color:#1f2937
-    end
-
-    subgraph customers["CUSTOMER DATA"]
-        Account["Account<br/>{{LDV}} | OWD:{{OWD}}"]
-        Contact["Contact<br/>OWD:{{OWD}}"]
-        Asset["Asset"]
-    end
-
-    subgraph cases["CASE MANAGEMENT"]
-        Case["Case<br/>{{LDV}} | OWD:{{OWD}}"]
-        CaseComment["CaseComment"]
-        CaseArticle["CaseArticle"]
-    end
-
-    subgraph entitlements["ENTITLEMENT MANAGEMENT"]
-        Entitlement["Entitlement"]
-        ServiceContract["ServiceContract"]
-        ContractLineItem["ContractLineItem"]
-        SlaProcess["SlaProcess"]
-    end
-
-    subgraph knowledge["KNOWLEDGE BASE"]
-        KnowledgeArticle["KnowledgeArticleVersion"]
-    end
-
-    subgraph assignment["ASSIGNMENT"]
-        User["User"]
-        Queue["Queue"]
-    end
-
-    %% ─────────────────────────────────────────────────────────────────────────────
-    %% RELATIONSHIPS
-    %% ─────────────────────────────────────────────────────────────────────────────
-
-    %% Customer → Case
+    %% Relationships - Customer to Case
+    Account -->|"LK"| Contact
     Account -->|"LK"| Case
     Contact -->|"LK"| Case
     Account -->|"LK"| Asset
     Asset -->|"LK"| Case
 
-    %% Case internal
-    Case -.->|"LK (self)"| Case
+    %% Relationships - Case internal
     Case ==>|"MD"| CaseComment
+    Case -->|"LK"| Knowledge
 
-    %% Entitlement → Case
+    %% Relationships - Entitlement
     Entitlement -->|"LK"| Case
-
-    %% Entitlement management
     Account -->|"LK"| Entitlement
     Account -->|"LK"| ServiceContract
     ServiceContract -->|"LK"| Entitlement
-    ServiceContract ==>|"MD"| ContractLineItem
-    SlaProcess -->|"LK"| Entitlement
-
-    %% Knowledge
-    Case -->|"LK"| CaseArticle
-    KnowledgeArticle -->|"LK"| CaseArticle
-
-    %% Assignment
-    User -->|"LK owns"| Case
-    Queue -->|"LK queue"| Case
-
-    %% ─────────────────────────────────────────────────────────────────────────────
-    %% STYLING
-    %% ─────────────────────────────────────────────────────────────────────────────
+    ServiceContract ==>|"MD"| CLI
 
     %% Standard Objects - Sky Blue
     style Account fill:#bae6fd,stroke:#0369a1,color:#1f2937
@@ -349,22 +84,36 @@ flowchart TB
     style Asset fill:#bae6fd,stroke:#0369a1,color:#1f2937
     style Case fill:#bae6fd,stroke:#0369a1,color:#1f2937
     style CaseComment fill:#bae6fd,stroke:#0369a1,color:#1f2937
-    style CaseArticle fill:#bae6fd,stroke:#0369a1,color:#1f2937
     style Entitlement fill:#bae6fd,stroke:#0369a1,color:#1f2937
     style ServiceContract fill:#bae6fd,stroke:#0369a1,color:#1f2937
-    style ContractLineItem fill:#bae6fd,stroke:#0369a1,color:#1f2937
-    style SlaProcess fill:#bae6fd,stroke:#0369a1,color:#1f2937
-    style KnowledgeArticle fill:#bae6fd,stroke:#0369a1,color:#1f2937
-    style User fill:#bae6fd,stroke:#0369a1,color:#1f2937
-    style Queue fill:#bae6fd,stroke:#0369a1,color:#1f2937
+    style CLI fill:#bae6fd,stroke:#0369a1,color:#1f2937
+    style Knowledge fill:#bae6fd,stroke:#0369a1,color:#1f2937
+```
 
-    %% Subgraph styling
-    style legend fill:#f8fafc,stroke:#334155,stroke-dasharray:5
-    style customers fill:#f0f9ff,stroke:#0369a1,stroke-dasharray:5
-    style cases fill:#f0f9ff,stroke:#0369a1,stroke-dasharray:5
-    style entitlements fill:#f0f9ff,stroke:#0369a1,stroke-dasharray:5
-    style knowledge fill:#f0f9ff,stroke:#0369a1,stroke-dasharray:5
-    style assignment fill:#f0f9ff,stroke:#0369a1,stroke-dasharray:5
+---
+
+## Simplified Version (Core Objects Only)
+
+For presentations focusing on core service flow:
+
+```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 50, "rankSpacing": 80}} }%%
+flowchart LR
+    Account["Account"]
+    Contact["Contact"]
+    Case["Case"]
+    Entitlement["Entitlement"]
+
+    Account -->|"LK"| Contact
+    Account -->|"LK"| Case
+    Contact -->|"LK"| Case
+    Entitlement -->|"LK"| Case
+    Account -->|"LK"| Entitlement
+
+    style Account fill:#bae6fd,stroke:#0369a1,color:#1f2937
+    style Contact fill:#bae6fd,stroke:#0369a1,color:#1f2937
+    style Case fill:#bae6fd,stroke:#0369a1,color:#1f2937
+    style Entitlement fill:#bae6fd,stroke:#0369a1,color:#1f2937
 ```
 
 ---
@@ -372,166 +121,97 @@ flowchart TB
 ## ASCII Fallback
 
 ```
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                       SERVICE CLOUD DATA MODEL                                ║
-╠══════════════════════════════════════════════════════════════════════════════╣
-║  LEGEND:                                                                      ║
-║    [STD] = Standard Object     LK = Lookup        ─── = Lookup               ║
-║    [CUST] = Custom Object      MD = Master-Det    ═══ = Master-Detail        ║
-╚══════════════════════════════════════════════════════════════════════════════╝
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  SERVICE CLOUD DATA MODEL (L→R)                                             │
+│  Legend: LK = Lookup (-->), MD = Master-Detail (==>)                        │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────┐      ┌─────────────────────────┐
-│      ACCOUNT [STD]      │──LK──│      CONTACT [STD]      │
-│  {{LDV}} | OWD:{{OWD}}  │      │     OWD:{{OWD}}         │
-├─────────────────────────┤      ├─────────────────────────┤
-│ Id (PK)                 │      │ Id (PK)                 │
-│ Name (Required)         │      │ AccountId (FK→Account)  │
-│ OwnerId (FK→User)       │      │ LastName (Required)     │
-│ Phone                   │      │ Email                   │
-└──────────┬──────────────┘      └──────────┬──────────────┘
-           │                                 │
-           │ LK                              │ LK
-           ▼                                 ▼
-┌─────────────────────────────────────────────────────────────┐
-│                         CASE [STD]                           │
-│                 {{LDV}} | OWD:{{OWD}}                        │
-├─────────────────────────────────────────────────────────────┤
-│ Id (PK)                    │ Subject                         │
-│ CaseNumber (Auto)          │ Description                     │
-│ AccountId (FK→Account)     │ Status (Required)               │
-│ ContactId (FK→Contact)     │ Priority                        │
-│ OwnerId (FK→User/Queue)    │ Origin (Required)               │
-│ ParentId (FK→Case)         │ IsClosed                        │
-│ EntitlementId (FK→Ent)     │ IsEscalated                     │
-└──────────┬─────────────────┴──────────────┬─────────────────┘
-           │                                 │
-           │ MD                              │ LK (junction)
-           ▼                                 ▼
-┌─────────────────────────┐      ┌─────────────────────────┐
-│   CASE_COMMENT [STD]    │      │    CASE_ARTICLE [STD]   │
-├─────────────────────────┤      ├─────────────────────────┤
-│ Id (PK)                 │      │ Id (PK)                 │
-│ ParentId (MD→Case)      │      │ CaseId (LK→Case)        │
-│ CommentBody             │      │ KnowledgeArticleId (LK) │
-│ IsPublished             │      │                         │
-└─────────────────────────┘      └──────────┬──────────────┘
-                                            │ LK
-                                            ▼
-                                 ┌─────────────────────────┐
-                                 │ KNOWLEDGE_ARTICLE [STD] │
-                                 ├─────────────────────────┤
-                                 │ Id (PK)                 │
-                                 │ Title (Required)        │
-                                 │ ArticleNumber           │
-                                 │ PublishStatus           │
-                                 │ IsLatestVersion         │
-                                 └─────────────────────────┘
+┌──────────┐          ┌──────────┐          ┌──────────────┐
+│ ACCOUNT  │── LK ───>│ CONTACT  │── LK ───>│     CASE     │
+│ (count)  │          │ (count)  │          │   (count)    │
+└────┬─────┘          └──────────┘          └──────┬───────┘
+     │                                             │
+     │ LK                                          │ MD
+     ▼                                             ▼
+┌──────────────┐                           ┌──────────────┐
+│    ASSET     │── LK ────────────────────>│ CASE_COMMENT │
+│   (count)    │                           │   (count)    │
+└──────────────┘                           └──────────────┘
 
-┌─────────────────────────────────────────────────────────────┐
-│                   ENTITLEMENT MANAGEMENT                     │
-├─────────────────────────────────────────────────────────────┤
-
-┌─────────────────────────┐      ┌─────────────────────────┐
-│   ENTITLEMENT [STD]     │──LK──│     SLA_PROCESS [STD]   │
-├─────────────────────────┤      ├─────────────────────────┤
-│ Id (PK)                 │      │ Id (PK)                 │
-│ Name (Required)         │      │ Name (Required)         │
-│ AccountId (FK→Account)  │      │ SobjectType             │
-│ ServiceContractId (FK)  │      │ IsActive                │
-│ SlaProcessId (FK→SLA)   │      │                         │
-│ StartDate               │      └─────────────────────────┘
-│ EndDate                 │
-│ RemainingCases          │
-└──────────┬──────────────┘
-           │ LK
-           ▼
-┌─────────────────────────┐      ┌─────────────────────────┐
-│  SERVICE_CONTRACT [STD] │══MD══│ CONTRACT_LINE_ITEM [STD]│
-├─────────────────────────┤      ├─────────────────────────┤
-│ Id (PK)                 │      │ Id (PK)                 │
-│ Name (Required)         │      │ ServiceContractId (MD)  │
-│ ContractNumber (Auto)   │      │ Product2Id (FK)         │
-│ AccountId (FK→Account)  │      │ Quantity                │
-│ StartDate               │      │ UnitPrice               │
-│ EndDate                 │      │ TotalPrice              │
-│ Status                  │      │                         │
-└─────────────────────────┘      └─────────────────────────┘
+┌──────────┐          ┌──────────────────┐          ┌───────────────────┐
+│ ACCOUNT  │── LK ───>│ SERVICE_CONTRACT │═══ MD ══>│ CONTRACT_LINE_ITEM│
+│          │          │     (count)      │          │      (count)      │
+└────┬─────┘          └────────┬─────────┘          └───────────────────┘
+     │                         │
+     │ LK                      │ LK
+     ▼                         ▼
+┌──────────────┐        ┌──────────────┐
+│ ENTITLEMENT  │◄───────│              │
+│   (count)    │        └──────────────┘
+└──────────────┘
 ```
 
 ---
 
 ## Key Relationships Summary
 
-| Parent | Child | Type | Notes |
-|--------|-------|------|-------|
-| Account | Case | LK | Customer relationship |
+| Parent | Child | Type | Behavior |
+|--------|-------|------|----------|
+| Account | Contact | LK | Customer contacts |
+| Account | Case | LK | Customer cases |
 | Contact | Case | LK | Reporter/requestor |
-| Case | Case | LK | Parent-child hierarchy |
-| Case | CaseComment | MD | Comments cascade delete |
+| Case | CaseComment | MD | Cascade delete |
 | Entitlement | Case | LK | SLA coverage |
 | Account | Entitlement | LK | Customer entitlements |
 | ServiceContract | Entitlement | LK | Contract includes entitlements |
-| ServiceContract | ContractLineItem | MD | Contract products |
-| SlaProcess | Entitlement | LK | Entitlement process |
-| Case | CaseArticle | LK | Junction to Knowledge |
-| User/Queue | Case | LK | Assignment |
+| ServiceContract | ContractLineItem | MD | Cascade delete |
+| Account | Asset | LK | Customer installed products |
+| Asset | Case | LK | Asset-related cases |
 
 ---
 
-## Service Cloud Specific Patterns
+## Service Cloud Patterns
 
-### Case Escalation Path
-
+### Case Flow
 ```
-Case (Open) → Case (Escalated) → Case (Closed)
-      │              │
-      └──────────────┴── CaseHistory tracks changes
+Customer → Contact → Case → CaseComment
+              ↓
+         Entitlement (SLA)
 ```
 
-### Entitlement Coverage Flow
-
+### Entitlement Coverage
 ```
 Account → ServiceContract → Entitlement → Case
-    │                            │
-    └────────────────────────────┘
-              Direct entitlement
-```
-
-### Knowledge Deflection
-
-```
-Customer → Search Knowledge → CaseArticle → Case
-                  │
-                  └── Self-service resolution
+    └─────────────────────────────────────┘
+                  (direct)
 ```
 
 ---
 
-## Customization
+## Adding Custom Objects
 
-### Add Custom Case Fields
-
-Extend the Case entity with custom fields:
+Use orange styling for custom objects:
 
 ```mermaid
-    Case {
-        Id Id PK "[STD] {{LDV}}"
-        %% ... standard fields ...
-        Text Custom_Field__c "[CUST] Custom tracking"
-    }
+%%{init: {"flowchart": {"nodeSpacing": 50, "rankSpacing": 80}} }%%
+flowchart LR
+    Case["Case<br/>(1,200)"]
+    Survey["Survey_Response__c<br/>(450)"]
+
+    Case -->|"LK"| Survey
+
+    %% Standard - Sky Blue
+    style Case fill:#bae6fd,stroke:#0369a1,color:#1f2937
+    %% Custom - Orange
+    style Survey fill:#fed7aa,stroke:#c2410c,color:#1f2937
 ```
 
-### Add Integration Object
+---
 
-For external ticketing system integration:
+## Best Practices
 
-```mermaid
-    subgraph ext["EXTERNAL SYSTEMS"]
-        ExternalTicket["External_Ticket__x"]
-    end
-
-    Case -->|"LK"| ExternalTicket
-
-    style ExternalTicket fill:#a7f3d0,stroke:#047857,color:#1f2937
-    style ext fill:#ecfdf5,stroke:#047857,stroke-dasharray:5
-```
+1. **Use `flowchart LR`** - Left-to-right flow for readability
+2. **Keep objects simple** - Name + record count only
+3. **Replace `(count)` placeholders** - With actual counts from query
+4. **Add LDV indicator** - For objects >2M records: `LDV[~4M]`
+5. **Color code object types** - Blue=Standard, Orange=Custom, Green=External
