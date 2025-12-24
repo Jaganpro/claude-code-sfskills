@@ -52,15 +52,17 @@ sf-apex/
 
 ## 🤖 Supported Agentic Coding Tools
 
-| Tool | Status | |
-|------|--------|--|
-| **Claude Code CLI** | ✅ Full Support | ![Claude](https://img.shields.io/badge/Anthropic-Claude_Code-191919?logo=anthropic&logoColor=white) |
-| **Amp CLI** | ✅ Compatible | ![Amp](https://img.shields.io/badge/Sourcegraph-Amp-FF5543?logo=sourcegraph&logoColor=white) |
-| **Droid CLI** | 🔧 Setup Required | ![Droid](https://img.shields.io/badge/Android-Droid-3DDC84?logo=android&logoColor=white) |
-| **Codex CLI** | 🚧 Experimental | ![OpenAI](https://img.shields.io/badge/OpenAI-Codex-412991?logo=openai&logoColor=white) |
-| **Cursor CLI** | 🔜 Planned | ![Cursor](https://img.shields.io/badge/Cursor-Agent_CLI-000000?logo=cursor&logoColor=white) |
-| **Agentforce Vibes CLI** | 🔜 Planned | ![Salesforce](https://img.shields.io/badge/Salesforce-Agentforce-00A1E0?logo=salesforce&logoColor=white) |
-| **Google Gemini CLI** | 🔜 Planned | ![Google](https://img.shields.io/badge/Google-Gemini_CLI-4285F4?logo=google&logoColor=white) |
+| Tool | Status | Install Path | |
+|------|--------|--------------|--|
+| **Claude Code CLI** | ✅ Full Support | `.claude-plugin/` | ![Claude](https://img.shields.io/badge/Anthropic-Claude_Code-191919?logo=anthropic&logoColor=white) |
+| **OpenCode CLI** | ✅ Installer | `.opencode/skill/` | ![OpenCode](https://img.shields.io/badge/Open-Code-4B32C3?logo=github&logoColor=white) |
+| **Codex CLI** | ✅ Installer | `.codex/skills/` | ![OpenAI](https://img.shields.io/badge/OpenAI-Codex-412991?logo=openai&logoColor=white) |
+| **Gemini CLI** | ✅ Installer | `~/.gemini/skills/` | ![Google](https://img.shields.io/badge/Google-Gemini_CLI-4285F4?logo=google&logoColor=white) |
+| **Amp CLI** | ✅ Compatible | `.claude/skills/` | ![Amp](https://img.shields.io/badge/Sourcegraph-Amp-FF5543?logo=sourcegraph&logoColor=white) |
+| **Droid CLI** | 🔧 Setup Required | — | ![Droid](https://img.shields.io/badge/Android-Droid-3DDC84?logo=android&logoColor=white) |
+| **Cursor CLI** | 🔜 Planned | — | ![Cursor](https://img.shields.io/badge/Cursor-Agent_CLI-000000?logo=cursor&logoColor=white) |
+
+> **Agent Skills Open Standard:** These skills follow the [Agent Skills specification](https://agentskills.io) for cross-CLI compatibility.
 
 ## ✨ Available Skills
 
@@ -83,11 +85,43 @@ sf-apex/
 
 ## 🚀 Installation
 
-First, add the marketplace to Claude Code:
+### Claude Code (Recommended)
+
+Add the marketplace to Claude Code:
 
 ```bash
 /plugin marketplace add Jaganpro/sf-skills
 ```
+
+### Other CLIs (OpenCode, Codex, Gemini)
+
+Use the installer script to transform and install skills for other agentic CLIs:
+
+```bash
+# Clone the repository
+git clone https://github.com/Jaganpro/sf-skills
+cd sf-skills
+
+# Install all skills for OpenCode
+python tools/installer.py --cli opencode --all
+
+# Install specific skills for Gemini
+python tools/installer.py --cli gemini --skills sf-apex sf-flow sf-deploy
+
+# Auto-detect installed CLIs and install all skills
+python tools/installer.py --detect --all
+
+# List available skills
+python tools/installer.py --list
+```
+
+The installer:
+- Transforms SKILL.md for CLI compatibility
+- Bundles shared modules for self-contained installation
+- Exports validation hooks as standalone scripts
+- Generates README with manual validation instructions
+
+See [tools/README.md](tools/README.md) for detailed installer documentation.
 
 ## 🎬 Video Tutorials
 
