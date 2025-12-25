@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Salesforce development skills for Claude Code",
-    "version": "2.1.0"
+    "version": "2.2.0"
   },
   "plugins": [
     {
@@ -24,7 +24,11 @@
         "./sf-ai-agentforce",
         "./sf-diagram",
         "./sf-integration",
-        "./sf-connected-apps"
+        "./sf-connected-apps",
+        "./sf-lwc",
+        "./sf-debug",
+        "./sf-soql",
+        "./sf-testing"
       ]
     },
     {
@@ -76,6 +80,26 @@
       "name": "sf-connected-apps",
       "description": "Connected Apps and External Client Apps with OAuth configuration and 120-point scoring",
       "source": "./sf-connected-apps"
+    },
+    {
+      "name": "sf-lwc",
+      "description": "Lightning Web Components development with SLDS 2 validation and 140-point scoring",
+      "source": "./sf-lwc"
+    },
+    {
+      "name": "sf-debug",
+      "description": "Salesforce debugging with log analysis, governor limits, and agentic fix suggestions",
+      "source": "./sf-debug"
+    },
+    {
+      "name": "sf-soql",
+      "description": "SOQL query generation, optimization, and 100-point validation",
+      "source": "./sf-soql"
+    },
+    {
+      "name": "sf-testing",
+      "description": "Apex test execution, coverage analysis, and agentic test-fix loops with 120-point scoring",
+      "source": "./sf-testing"
     }
   ]
 }
