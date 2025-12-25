@@ -8,6 +8,7 @@ validation feedback for LWC files (*.html, *.css, *.js).
 Integrates:
 1. Custom 140-point SLDS 2 scoring (7 categories)
 2. Official SLDS Linter (if available via npm)
+3. Salesforce Code Analyzer V5 (ESLint + retire-js engines for JS files)
 
 Hook Input (stdin): JSON with tool_input and tool_response
 Hook Output (stdout): JSON with optional output message
@@ -105,6 +106,51 @@ def validate_lwc_file(file_path: str) -> dict:
             pass
 
         # ═══════════════════════════════════════════════════════════════════
+        # PHASE 2.5: Code Analyzer V5 scanning (ESLint + retire-js for JS files)
+        # ═══════════════════════════════════════════════════════════════════
+        ca_violations = []
+        ca_engines_used = []
+        ca_engines_unavailable = []
+        ca_available = False
+        scan_time_ms = 0
+
+        # Only run CA on .js files (ESLint/retire-js don't apply to HTML/CSS)
+        if ext == '.js':
+            try:
+                from code_analyzer.scanner import CodeAnalyzerScanner, SkillType
+
+                scanner = CodeAnalyzerScanner()
+
+                if scanner.is_available():
+                    ca_available = True
+                    scan_result = scanner.scan(file_path, SkillType.LWC)
+
+                    if scan_result.success:
+                        ca_violations = scan_result.violations
+                        ca_engines_used = scan_result.engines_used
+                        ca_engines_unavailable = scan_result.engines_unavailable
+                        scan_time_ms = scan_result.scan_time_ms
+
+                        # Merge CA violations with issues
+                        for v in ca_violations:
+                            issues.append({
+                                'severity': v.get('severity_label', 'WARNING'),
+                                'category': 'code_analyzer',
+                                'message': f"[{v.get('engine', 'CA')}:{v.get('rule', '')}] {v.get('message', '')}",
+                                'line': v.get('line', 0),
+                                'source': f"CA:{v.get('engine', '')}"
+                            })
+                    else:
+                        ca_engines_unavailable = ["Error: " + (scan_result.error_message or "Unknown")]
+                else:
+                    ca_engines_unavailable = ["sf CLI with Code Analyzer not installed"]
+
+            except ImportError as e:
+                ca_engines_unavailable = [f"Module not available: {e}"]
+            except Exception as e:
+                ca_engines_unavailable = [f"Scanner error: {e}"]
+
+        # ═══════════════════════════════════════════════════════════════════
         # PHASE 3: Calculate rating
         # ═══════════════════════════════════════════════════════════════════
         pct = (score / max_score * 100) if max_score > 0 else 0
@@ -153,6 +199,21 @@ def validate_lwc_file(file_path: str) -> dict:
         else:
             output_parts.append("💡 SLDS Linter: Not installed")
             output_parts.append("   Install: npm i -g @salesforce-ux/slds-linter")
+
+        # Code Analyzer status (for JS files only)
+        if ext == '.js':
+            output_parts.append("")
+            if ca_engines_used:
+                output_parts.append(f"🔍 Code Analyzer: {', '.join(ca_engines_used)}")
+                if scan_time_ms > 0:
+                    output_parts.append(f"   Scan time: {scan_time_ms}ms")
+            elif ca_available:
+                output_parts.append("🔍 Code Analyzer: No engines ran")
+            else:
+                output_parts.append("💡 Code Analyzer: Not available")
+                if ca_engines_unavailable:
+                    for unavail in ca_engines_unavailable[:2]:
+                        output_parts.append(f"   ⚠️ {unavail}")
 
         # Issues list
         if issues:
